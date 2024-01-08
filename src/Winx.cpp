@@ -8,14 +8,39 @@
 #include <iostream>
 #include <string>
 
+std::string* readFile(std::string source) {
+  std::ifstream file_stream(source.c_str());
+  std::string* raw =
+      new std::string((std::istreambuf_iterator<char>(file_stream)),
+                      (std::istreambuf_iterator<char>()));
+  return raw;
+}
+
 namespace Winx {}
 namespace Winx::Bindings {}
+
+namespace Winx::Bindings::FileSystem {
+void read_file(const v8::FunctionCallbackInfo<v8::Value>& args);
+}
+
 namespace Winx::Bindings::Console {
 void log(const v8::FunctionCallbackInfo<v8::Value>& args);
 void debug(const v8::FunctionCallbackInfo<v8::Value>& args);
 void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
                      const char* prefix);
 }  // namespace Winx::Bindings::Console
+
+void Winx::Bindings::FileSystem::read_file(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() < 1) {
+    return;
+  }
+  v8::String::Utf8Value filePath(isolate, args[0]);
+  auto fileData = readFile(std::string(*filePath));
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, fileData->c_str(),
+                                                     v8::NewStringType::kNormal)
+                                 .ToLocalChecked());
+}
 
 void Winx::Bindings::Console::formatted_print(
     const v8::FunctionCallbackInfo<v8::Value>& args,
@@ -35,16 +60,11 @@ void Winx::Bindings::Console::log(
 
 void Winx::Bindings::Console::debug(
     const v8::FunctionCallbackInfo<v8::Value>& args) {
-  Winx::Bindings::Console::formatted_print(args, "\033[0;m[\033[1;35mdebug\033[0;m] ");
+  Winx::Bindings::Console::formatted_print(
+      args, "\033[0;m[\033[1;35mdebug\033[0;m] ");
 }
 
-std::string* readFile(std::string source) {
-  std::ifstream file_stream(source.c_str());
-  std::string* raw =
-      new std::string((std::istreambuf_iterator<char>(file_stream)),
-                      (std::istreambuf_iterator<char>()));
-  return raw;
-}
+
 
 int main(int argc, char* argv[]) {
   // Read program to run
@@ -76,8 +96,12 @@ int main(int argc, char* argv[]) {
     v8::Local<v8::ObjectTemplate> winx = v8::ObjectTemplate::New(isolate);
     winx->Set(isolate, "log",
               v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::log));
-    winx->Set(isolate, "debug",
-              v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::debug));
+    winx->Set(
+        isolate, "debug",
+        v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::debug));
+    winx->Set(isolate, "readFile",
+              v8::FunctionTemplate::New(isolate,
+                                        Winx::Bindings::FileSystem::read_file));
     global->Set(isolate, "Winx", winx);
 
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, global);
