@@ -1,1 +1,1 @@
-print("Hello Winx!")
+Winx.debug("Hello Winx! 🦋") 
