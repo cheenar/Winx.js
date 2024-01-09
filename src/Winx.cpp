@@ -1,27 +1,15 @@
+#ifndef WINX_MAIN
+#define WINX_MAIN
+
+#include "util.hpp"
+#include "bindings/winx_fs.hpp"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "../include/v8/libplatform/libplatform.h"
 #include "../include/v8/v8.h"
-
-#include <fstream>
-#include <iostream>
-#include <string>
-
-std::string* readFile(std::string source) {
-  std::ifstream file_stream(source.c_str());
-  std::string* raw =
-      new std::string((std::istreambuf_iterator<char>(file_stream)),
-                      (std::istreambuf_iterator<char>()));
-  return raw;
-}
-
-namespace Winx {}
-namespace Winx::Bindings {}
-
-namespace Winx::Bindings::FileSystem {
-void read_file(const v8::FunctionCallbackInfo<v8::Value>& args);
-}
 
 namespace Winx::Bindings::Console {
 void log(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -29,18 +17,6 @@ void debug(const v8::FunctionCallbackInfo<v8::Value>& args);
 void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
                      const char* prefix);
 }  // namespace Winx::Bindings::Console
-
-void Winx::Bindings::FileSystem::read_file(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  v8::Isolate* isolate = args.GetIsolate();
-  if (args.Length() < 1) {
-    return;
-  }
-  v8::String::Utf8Value filePath(isolate, args[0]);
-  auto fileData = readFile(std::string(*filePath));
-  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, fileData->c_str(),
-                                                     v8::NewStringType::kNormal)
-                                 .ToLocalChecked());
-}
 
 void Winx::Bindings::Console::formatted_print(
     const v8::FunctionCallbackInfo<v8::Value>& args,
@@ -68,10 +44,10 @@ void Winx::Bindings::Console::debug(
 
 int main(int argc, char* argv[]) {
   // Read program to run
-  std::string* source_file = readFile(std::string(argv[1]));
+  std::string* source_file = Util::read_file(std::string(argv[1]));
 
   // TODO: this will never be portable!
-  std::string* bootstrapper = readFile(std::string("./winx-polyfills.js"));
+  std::string* bootstrapper = Util::read_file(std::string("./winx-polyfills.js"));
 
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);
@@ -139,3 +115,5 @@ int main(int argc, char* argv[]) {
   delete create_params.array_buffer_allocator;
   return 0;
 }
+
+#endif // WINX_MAIN
