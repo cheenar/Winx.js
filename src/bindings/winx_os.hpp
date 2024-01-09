@@ -6,23 +6,24 @@
 
 namespace Winx::Bindings::Os {
 
-void get_free_memory(const v8::FunctionCallbackInfo<v8::Value>& args) {
+static void get_free_memory(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
     if (args.Length() > 0) {
-      return;
+        return;
     }
     auto freeMemory = static_cast<double>(uv_get_free_memory());
     args.GetReturnValue().Set(freeMemory);
 }
 
-void get_total_memory(const v8::FunctionCallbackInfo<v8::Value>& args) {
+static void get_total_memory(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
     if (args.Length() > 0) {
-      return;
+        return;
     }
     auto totalMemory = static_cast<double>(uv_get_total_memory());
     args.GetReturnValue().Set(totalMemory);
 }
 
-}
+} // namespace Winx::Bindings::Os
 
-
-#endif  // WINX_OS_HPP
+#endif // WINX_OS_HPP

@@ -2,21 +2,23 @@
 #define WINX_FS_HPP
 
 #include "../../include/v8/v8.h"
+#include "../util.hpp"
 
 namespace Winx::Bindings::FileSystem {
 
-void read_file(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void read_file(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
     v8::Isolate* isolate = args.GetIsolate();
     if (args.Length() < 1) {
-      return;
+        return;
     }
     v8::String::Utf8Value filePath(isolate, args[0]);
     auto fileData = Util::read_file(std::string(*filePath));
-    args.GetReturnValue()
-      .Set(v8::String::NewFromUtf8(isolate, fileData->c_str(), v8::NewStringType::kNormal)
-      .ToLocalChecked());
+    args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, fileData->c_str(),
+        v8::NewStringType::kNormal)
+                                  .ToLocalChecked());
 }
 
-}
+} // namespace Winx::Bindings::FileSystem
 
-#endif  // WINX_FS_HPP
+#endif // WINX_FS_HPP

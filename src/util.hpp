@@ -7,6 +7,6 @@
 
 namespace Util {
 std::string* read_file(std::string source);
-}  // namespace Util
+} // namespace Util
 
-#endif  // UTIL_HPP
+#endif // UTIL_HPP
