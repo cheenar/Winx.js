@@ -3,6 +3,7 @@
 
 #include "util.hpp"
 #include "bindings/winx_fs.hpp"
+#include "bindings/winx_os.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
   std::string* source_file = Util::read_file(std::string(argv[1]));
 
   // TODO: this will never be portable!
-  std::string* bootstrapper = Util::read_file(std::string("./winx-polyfills.js"));
+  std::string* bootstrapper = Util::read_file(std::string("./src/polyfills/Winx.js"));
 
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);
@@ -78,6 +79,8 @@ int main(int argc, char* argv[]) {
     winx->Set(isolate, "readFile",
               v8::FunctionTemplate::New(isolate,
                                         Winx::Bindings::FileSystem::read_file));
+    winx->Set(isolate, "getFreeMemory", v8::FunctionTemplate::New(
+                                            isolate, Winx::Bindings::Os::get_free_memory));
     global->Set(isolate, "Winx", winx);
 
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, global);
