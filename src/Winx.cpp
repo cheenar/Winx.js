@@ -7,41 +7,10 @@
 
 #include "../include/v8/libplatform/libplatform.h"
 #include "../include/v8/v8.h"
+#include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
 #include "util.hpp"
-
-namespace Winx::Bindings::Console {
-void log(const v8::FunctionCallbackInfo<v8::Value>& args);
-void debug(const v8::FunctionCallbackInfo<v8::Value>& args);
-void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
-    const char* prefix);
-} // namespace Winx::Bindings::Console
-
-void Winx::Bindings::Console::formatted_print(
-    const v8::FunctionCallbackInfo<v8::Value>& args,
-    const char* prefix)
-{
-    v8::Isolate* isolate = args.GetIsolate();
-    if (args.Length() < 1) {
-        return;
-    }
-    v8::String::Utf8Value message(isolate, args[0]);
-    std::cout << prefix << *message << std::endl;
-}
-
-void Winx::Bindings::Console::log(
-    const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    Winx::Bindings::Console::formatted_print(args, "");
-}
-
-void Winx::Bindings::Console::debug(
-    const v8::FunctionCallbackInfo<v8::Value>& args)
-{
-    Winx::Bindings::Console::formatted_print(
-        args, "\033[0;m[\033[1;35mdebug\033[0;m] ");
-}
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +25,11 @@ int main(int argc, char* argv[])
     v8::V8::InitializeExternalStartupData(argv[0]);
     std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
     v8::V8::InitializePlatform(platform.get());
+    
+    v8::V8::SetFlagsFromString("--max-heap-size=1024");
+
     v8::V8::Initialize();
+
 
     // Create a new Isolate and make it the current one.
     v8::Isolate::CreateParams create_params;
@@ -71,17 +44,30 @@ int main(int argc, char* argv[])
         v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
         // create a prototype method on the global
         v8::Local<v8::ObjectTemplate> winx = v8::ObjectTemplate::New(isolate);
-        winx->Set(isolate, "log",
+
+        v8::Local<v8::ObjectTemplate> console = v8::ObjectTemplate::New(isolate);
+        v8::Local<v8::ObjectTemplate> os = v8::ObjectTemplate::New(isolate);
+
+        console->Set(isolate, "log",
             v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::log));
-        winx->Set(
+        console->Set(
             isolate, "debug",
             v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::debug));
+
         winx->Set(isolate, "readFile",
             v8::FunctionTemplate::New(isolate,
                 Winx::Bindings::FileSystem::read_file));
-        winx->Set(isolate, "getFreeMemory",
+
+        os->Set(isolate, "getFreeMemory",
             v8::FunctionTemplate::New(isolate,
                 Winx::Bindings::Os::get_free_memory));
+
+        os->Set(isolate, "getTotalMemory",
+            v8::FunctionTemplate::New(isolate,
+                Winx::Bindings::Os::get_total_memory));
+
+        winx->Set(isolate, "console", console);
+        winx->Set(isolate, "os", os);
         global->Set(isolate, "Winx", winx);
 
         v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, global);
@@ -98,9 +84,10 @@ int main(int argc, char* argv[])
                 v8::NewStringType::kNormal)
                                                     .ToLocalChecked();
             v8::Local<v8::Script> script = v8::Script::Compile(context, source_code).ToLocalChecked();
-            v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
-            v8::String::Utf8Value utf8(isolate, result);
-            std::cout << "Result: " << *utf8 << std::endl;
+            /* v8::Local<v8::Value> result =  */ 
+            script->Run(context).ToLocalChecked();
+            // v8::String::Utf8Value utf8(isolate, result);
+            // std::cout << "Result: " << *utf8 << std::endl;
         }
     }
 
