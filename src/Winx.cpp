@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "libplatform/libplatform.h"
-#include "v8.h"
+#include <v8.h>
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"

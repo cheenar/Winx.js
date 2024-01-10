@@ -1,8 +1,8 @@
 #ifndef WINX_OS_HPP
 #define WINX_OS_HPP
 
-#include "../uv/uv.h"
-#include "../v8/v8.h"
+#include <uv.h>
+#include <v8.h>
 
 namespace Winx::Bindings::Os {
 
