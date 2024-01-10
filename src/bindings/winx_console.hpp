@@ -1,7 +1,7 @@
 #ifndef WINX_CONSOLE_HPP
 #define WINX_CONSOLE_HPP
 
-#include "../../include/v8/v8.h"
+#include "../v8/v8.h"
 #include <iostream>
 
 static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args, const char* prefix);

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/v8/libplatform/libplatform.h"
-#include "../include/v8/v8.h"
+#include "libplatform/libplatform.h"
+#include "v8.h"
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
     v8::V8::SetFlagsFromString("--max-heap-size=1024");
 
     v8::V8::Initialize();
-
 
     // Create a new Isolate and make it the current one.
     v8::Isolate::CreateParams create_params;

@@ -1,7 +1,7 @@
 #ifndef WINX_FS_HPP
 #define WINX_FS_HPP
 
-#include "../../include/v8/v8.h"
+#include "../v8/v8.h"
 #include "../util.hpp"
 
 namespace Winx::Bindings::FileSystem {
