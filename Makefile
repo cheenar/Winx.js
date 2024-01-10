@@ -1,2 +1,19 @@
-winx:
-	clang++ -o out/winx -I./include/v8 -I./include/uv ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a -std=c++17 -O3 -Wall -pedantic src/Winx.cpp src/util.cpp
+CXX = clang++
+CXXFLAGS = -std=c++17 -O3 -Wall -pedantic
+INCLUDES = -I./include/v8 -I./include/uv
+LIBS = ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a
+SRCDIR = src
+OBJDIR = obj
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
+TARGET = out/winx
+
+$(TARGET): $(OBJS)
+	$(CXX) -o $@ $(OBJS) $(LIBS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+clean:
+	rm -rf $(OBJDIR) $(TARGET)
