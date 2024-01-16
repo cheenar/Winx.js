@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-namespace Util {
+namespace WinxUtil {
 
 std::string* read_file(std::string source) {
   std::ifstream file_stream(source.c_str());
@@ -15,4 +15,4 @@ void debug_print(std::string prefix, std::string message) {
             << termcolor::reset << "]: " << message << std::endl;
 }
 
-}  // namespace Util
+}  // namespace WinxUtil

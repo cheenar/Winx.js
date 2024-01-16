@@ -8,19 +8,19 @@
 #include <toml.h>
 #include <v8.h>
 
-#include "winx_config.hpp"
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
 #include "util.hpp"
+#include "winx_config.hpp"
 
 int main(int argc, char* argv[]) {
   // Read program to run
-  std::string* source_file = Util::read_file(std::string(argv[1]));
+  std::string* source_file = WinxUtil::read_file(std::string(argv[1]));
 
   // TODO: this will never be portable!
   std::string* bootstrapper =
-      Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
+      WinxUtil::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);

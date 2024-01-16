@@ -6,9 +6,9 @@
 #include <string>
 #include <termcolor/termcolor.hpp>
 
-namespace Util {
+namespace WinxUtil {
 std::string* read_file(std::string source);
 void debug_print(std::string prefix, std::string message);
-}  // namespace Util
+}  // namespace WinxUtil
 
 #endif  // UTIL_HPP
