@@ -1,13 +1,8 @@
-<center>
-    <img src="./docs/images/winx_logo.png" />
-</center>
+![logo](./docs/images/winx_logo.png)
 
-<center>
-    <h1> 🦋 Winx.js </h1>
-</center>
+# 🦋 Winx.js
 
-
-<img src="./docs/images/demo.png"  />
+![demo](./docs/images/demo.png)
 
 * Lightweight, JavaScript Runtime
 * Built on battle-tested (presumably!) V8 JavaScript Engine
