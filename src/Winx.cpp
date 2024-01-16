@@ -11,8 +11,8 @@
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
-#include "util.hpp"
 #include "winx_config.hpp"
+#include "winx_util.hpp"
 
 int main(int argc, char* argv[]) {
   // Read program to run

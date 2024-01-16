@@ -3,7 +3,7 @@
 
 #include <v8.h>
 
-#include "../util.hpp"
+#include "../winx_util.hpp"
 
 namespace Winx::Bindings::FileSystem {
 
