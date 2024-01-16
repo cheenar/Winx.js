@@ -84,6 +84,8 @@ int main(int argc, char* argv[]) {
     os->Set(isolate, "getTotalMemory",
             v8::FunctionTemplate::New(isolate,
                                       Winx::Bindings::Os::get_total_memory));
+    os->Set(isolate, "stdin",
+            v8::FunctionTemplate::New(isolate, Winx::Bindings::Os::prompt));
 
     winx->Set(isolate, "console", console);
     winx->Set(isolate, "os", os);

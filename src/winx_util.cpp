@@ -1,7 +1,5 @@
 #include "winx_util.hpp"
 
-extern bool kIsDebugModeEnabled;
-
 namespace Winx::Util {
 
 std::string* read_file(std::string source) {
