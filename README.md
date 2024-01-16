@@ -1,6 +1,10 @@
-![logo](./docs/images/winx_logo.png)
-
-# 🦋 Winx.js
+<div align="center">
+  <img src="./docs/images/winx_logo.png" alt="Winx IA" width="200">
+  <br/>
+  <h3>🦋 Winx.js</h3>
+  <br />
+  <p>Somewhat a JavaScript Runtime</p>
+</div>
 
 ![demo](./docs/images/demo.png)
 
