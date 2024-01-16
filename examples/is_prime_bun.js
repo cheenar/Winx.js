@@ -1,5 +1,10 @@
-const val = Winx.os.stdin("Enter a positive number: ")
-const number = Number.parseInt(val);
+
+const x = "Enter a positive number: ";
+process.stdout.write(x);
+
+const line = prompt();
+
+const number = Number.parseInt(line);
 let isPrime = true;
 
 // check if number is equal to 1
