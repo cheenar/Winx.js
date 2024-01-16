@@ -9,9 +9,9 @@
 // really simple debug control, going to make this "better" one day
 #define K_DEBUG_ENABLED true
 
-namespace WinxUtil {
+namespace Winx::Util {
 std::string* read_file(std::string source);
 void debug_print(std::string prefix, std::string message);
-}  // namespace WinxUtil
+}  // namespace Winx::Util
 
 #endif  // UTIL_HPP

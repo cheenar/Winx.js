@@ -1,5 +1,8 @@
 #include "winx_console.hpp"
 
+static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
+                            std::string prefix);
+
 namespace Winx::Bindings::Console {
 
 void log(const v8::FunctionCallbackInfo<v8::Value>& args) {

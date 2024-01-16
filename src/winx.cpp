@@ -12,20 +12,22 @@
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
 #include "winx_config.hpp"
+#include "winx_platform.hpp"
 #include "winx_util.hpp"
 
 int main(int argc, char* argv[]) {
   // Read program to run
-  std::string* source_file = WinxUtil::read_file(std::string(argv[1]));
+  std::string* source_file = Winx::Util::read_file(std::string(argv[1]));
 
   // TODO: this will never be portable!
   std::string* bootstrapper =
-      WinxUtil::read_file(WinxConfig::get_winx_flag("polyfills_file"));
+      Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);
   v8::V8::InitializeExternalStartupData(argv[0]);
-  std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
+  std::unique_ptr<Winx::WinxPlatform> platform =
+      v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
 
   v8::V8::SetFlagsFromString(WinxConfig::get_v8_flags().c_str());
