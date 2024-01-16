@@ -8,6 +8,7 @@
 #include <toml.h>
 #include <v8.h>
 
+#include <cli11/CLI11.hpp>
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
@@ -16,9 +17,22 @@
 #include "winx_platform.hpp"
 #include "winx_util.hpp"
 
+bool kIsDebugModeEnabled;
+
 int main(int argc, char* argv[]) {
+  std::string filename;
+
+  CLI::App app{"Winx - A V8-based JavaScript runtime for Macintosh."};
+  bool IS_DEBUG;
+  app.add_flag("-D,--debug", IS_DEBUG, "Enable debug mode (default: false)")
+      ->default_val(false);
+  app.add_option("filename", filename, "The program needed to execute")
+      ->required();
+  CLI11_PARSE(app, argc, argv);
+  kIsDebugModeEnabled = IS_DEBUG;
+
   // Read program to run
-  std::string* source_file = Winx::Util::read_file(std::string(argv[1]));
+  std::string* source_file = Winx::Util::read_file(filename);
 
   std::string* bootstrapper =
       Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));

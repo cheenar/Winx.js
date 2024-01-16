@@ -7,7 +7,7 @@
 #include <termcolor/termcolor.hpp>
 
 // really simple debug control, going to make this "better" one day
-#define K_DEBUG_ENABLED true
+// #define K_DEBUG_ENABLED true
 
 namespace Winx::Util {
 std::string* read_file(std::string source);

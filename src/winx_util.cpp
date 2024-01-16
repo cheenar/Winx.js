@@ -1,5 +1,7 @@
 #include "winx_util.hpp"
 
+extern bool kIsDebugModeEnabled;
+
 namespace Winx::Util {
 
 std::string* read_file(std::string source) {
@@ -11,7 +13,7 @@ std::string* read_file(std::string source) {
 }
 
 void debug_print(std::string prefix, std::string message) {
-  if (!K_DEBUG_ENABLED)
+  if (!kIsDebugModeEnabled)
     return;
   std::cout << "[" << termcolor::bold << termcolor::magenta << prefix
             << termcolor::reset << "]: " << message << std::endl;

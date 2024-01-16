@@ -58,6 +58,7 @@
         "variant": "cpp",
         "vector": "cpp",
         "algorithm": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "set": "cpp"
     }
 }
