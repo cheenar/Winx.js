@@ -1,2 +1,3 @@
-let result = Winx.readFile("./examples/hello_winx.js");
-Winx.console.debug("Outputting File: " + result)
+let file = "./examples/hello_libuv.js"
+let result = Winx.readFile(file);
+Winx.console.debug("Outputting [" + file + "]\n" + result)

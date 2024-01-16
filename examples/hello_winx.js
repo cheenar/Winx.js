@@ -1,1 +1,1 @@
-Winx.console.debug("Hello Winx! 🦋") 
+Winx.console.log("Hello Winx! 🦋") 

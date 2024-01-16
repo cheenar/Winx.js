@@ -4,7 +4,7 @@ INCLUDES = -I./include/toml++ -I./include/v8 -I./include/uv -I./include
 LIBS = ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a 
 SRCDIR = src
 OBJDIR = obj
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(shell find $(SRCDIR)/ -type f -name '*.cpp')
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
 TARGET = out/winx
 

@@ -11,6 +11,8 @@ std::string* read_file(std::string source) {
 }
 
 void debug_print(std::string prefix, std::string message) {
+  if (!K_DEBUG_ENABLED)
+    return;
   std::cout << "[" << termcolor::bold << termcolor::magenta << prefix
             << termcolor::reset << "]: " << message << std::endl;
 }
