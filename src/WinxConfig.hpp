@@ -5,11 +5,12 @@
 
 #include <iostream>
 #include <string>
+#include "util.hpp"
 
 using namespace std;
 
 namespace WinxConfig {
-toml::table parse_config(string config_file = "Winx.toml");
+string get_v8_flags(string config_file = "Winx.toml");
 }  // namespace WinxConfig
 
 #endif  // __WINX_CONFIG_HPP__

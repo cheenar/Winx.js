@@ -1,7 +1,7 @@
 CXX = clang++
 CXXFLAGS = -std=c++17 -O3 -Wall -pedantic
-INCLUDES = -I./include/v8 -I./include/uv -I./include/toml++
-LIBS = ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a
+INCLUDES = -I./include/toml++ -I./include/v8 -I./include/uv -I./include
+LIBS = ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a 
 SRCDIR = src
 OBJDIR = obj
 SRCS = $(wildcard $(SRCDIR)/*.cpp)

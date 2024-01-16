@@ -15,8 +15,6 @@
 #include "util.hpp"
 
 int main(int argc, char* argv[]) {
-  toml::table tbl = WinxConfig::parse_config();
-
   // Read program to run
   std::string* source_file = Util::read_file(std::string(argv[1]));
 
@@ -30,7 +28,7 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
 
-  v8::V8::SetFlagsFromString("--max-heap-size=1024");
+  v8::V8::SetFlagsFromString(WinxConfig::get_v8_flags().c_str());
 
   v8::V8::Initialize();
 

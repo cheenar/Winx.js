@@ -4,9 +4,11 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <termcolor/termcolor.hpp>
 
 namespace Util {
 std::string* read_file(std::string source);
-} // namespace Util
+void debug_print(std::string prefix, std::string message);
+}  // namespace Util
 
-#endif // UTIL_HPP
+#endif  // UTIL_HPP
