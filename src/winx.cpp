@@ -19,7 +19,7 @@
 
 bool kIsDebugModeEnabled;
 
-int main(int argc, char* argv[]) {
+int internal_main(int argc, char* argv[]) {
   std::string filename;
 
   CLI::App app{"Winx - A V8-based JavaScript runtime for Macintosh."};
@@ -136,5 +136,10 @@ int main(int argc, char* argv[]) {
   delete create_params.array_buffer_allocator;
   return 0;
 }
+
+int main(int argc, char* argv[]) {
+  internal_main(argc, argv);
+}
+
 
 #endif  // WINX_MAIN

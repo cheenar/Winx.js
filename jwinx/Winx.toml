@@ -1,0 +1,15 @@
+[v8]
+max-heap-size = 2048
+jitless = false
+gc-experiment-less-compaction = true
+expose-wasm = false
+shared-string-table = true
+maglev = true
+turbofan = true
+turbo-string-builder = true
+turbo-compress-frame-translations = true
+turboshaft-typed-optimizations = true
+turboshaft-load-elimination = true
+concurrent-maglev-high-priority-threads = true
+
+[winx]

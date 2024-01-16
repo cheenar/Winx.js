@@ -31,3 +31,6 @@ static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
               << *message << std::endl;
   }
 }
+
+// ../obj/winx.o  ../obj//winx_config.o  ../obj//bindings/winx_console.o
+// obj//winx_util.o

@@ -1,16 +1,15 @@
-<div align="center">
+<h1 align="center">
   <img src="./docs/images/winx_logo.png" alt="Winx IA" width="200">
   <br/>
-  <h3>🦋 Winx.js</h3>
+  🦋 Winx.js
   <br />
-  <p>Somewhat a JavaScript Runtime</p>
-</div>
+</h1>
 
 ![demo](./docs/images/demo.png)
 
 * Lightweight, JavaScript Runtime
 * Built on battle-tested (presumably!) V8 JavaScript Engine
-* Designed for embedding in Java 21+ Application (FFM)
+* Building towards JNI support
 
 ## Configuration
 
