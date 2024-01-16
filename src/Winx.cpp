@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
   // TODO: this will never be portable!
   std::string* bootstrapper =
-      Util::read_file(std::string("./src/polyfills/Winx.js"));
+      Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);

@@ -3,3 +3,6 @@ max-heap-size = 2048
 jitless = true
 gc-experiment-less-compaction = true
 expose-wasm = false
+
+[winx]
+polyfills_file = "./src/polyfills/Winx.js"

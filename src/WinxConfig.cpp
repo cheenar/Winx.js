@@ -44,6 +44,15 @@ string get_v8_flags(string config_file) {
   return flag_str;
 }
 
+string get_winx_flag(string flag_name, string config_file) {
+  auto tbl = parse_config(config_file);
+  auto config_value = tbl["winx"][flag_name].value_or(""s);
+  if (config_value != "") {
+    Util::debug_print("Winx Flag", flag_name + "=" + config_value);
+  }
+  return config_value;
+}
+
 }  // namespace WinxConfig
 
 #endif  // WINXCONFIG_CPP
