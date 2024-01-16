@@ -5,4 +5,3 @@ gc-experiment-less-compaction = true
 expose-wasm = false
 
 [winx]
-polyfills_file = "./src/polyfills/Winx.js"

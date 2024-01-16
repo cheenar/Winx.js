@@ -40,3 +40,5 @@ out/winx
 *.exe
 *.out
 *.app
+
+embedded*.h

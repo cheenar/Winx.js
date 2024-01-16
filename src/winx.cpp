@@ -11,6 +11,7 @@
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"
+#include "embedded_winx_polyfill.h"
 #include "winx_config.hpp"
 #include "winx_platform.hpp"
 #include "winx_util.hpp"
@@ -19,7 +20,6 @@ int main(int argc, char* argv[]) {
   // Read program to run
   std::string* source_file = Winx::Util::read_file(std::string(argv[1]));
 
-  // TODO: this will never be portable!
   std::string* bootstrapper =
       Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
@@ -79,10 +79,19 @@ int main(int argc, char* argv[]) {
     // Enter the context for compiling and running the hello world script.
     v8::Context::Scope context_scope(context);
     {
-      v8::Local<v8::String> initial_runtime =
-          v8::String::NewFromUtf8(isolate, bootstrapper->c_str(),
-                                  v8::NewStringType::kNormal)
-              .ToLocalChecked();
+      v8::Local<v8::String> initial_runtime;
+      // TODO: Still really hacky :D
+      if (*bootstrapper != " ") {
+        initial_runtime =
+            v8::String::NewFromUtf8(isolate, (const char*)src_polyfills_Winx_js,
+                                    v8::NewStringType::kNormal)
+                .ToLocalChecked();
+      } else {
+        initial_runtime =
+            v8::String::NewFromUtf8(isolate, bootstrapper->c_str(),
+                                    v8::NewStringType::kNormal)
+                .ToLocalChecked();
+      }
       v8::Local<v8::Script> initial_runtime_script =
           v8::Script::Compile(context, initial_runtime).ToLocalChecked();
       initial_runtime_script->Run(context).ToLocalChecked();
