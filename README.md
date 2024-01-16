@@ -1,10 +1,13 @@
 <center>
-    <h1> 🦋 Winx.js </h1>
+    <img src="./docs/images/winx_logo.png" />
 </center>
 
 <center>
-    <img src="./docs/images/demo.png" />
+    <h1> 🦋 Winx.js </h1>
 </center>
+
+
+<img src="./docs/images/demo.png" align="center" height="48" width="48" />
 
 * Lightweight, JavaScript Runtime
 * Built on battle-tested (presumably!) V8 JavaScript Engine
