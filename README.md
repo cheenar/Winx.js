@@ -12,7 +12,8 @@
 
 ## Configuration
 
-You can define a `Winx.toml` file in the same directory as executing the `winx` binary. You are able to configure any v8 flag by default. 
+You can define a `Winx.toml` file in the same directory as executing the `winx` binary. You are able 
+to configure any [V8 Flag](./V8_FLAGS.md) by default. 
 
 ```toml
 [v8]
