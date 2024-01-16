@@ -7,7 +7,7 @@
 </center>
 
 
-<img src="./docs/images/demo.png" align="center" height="48" width="48" />
+<img src="./docs/images/demo.png"  />
 
 * Lightweight, JavaScript Runtime
 * Built on battle-tested (presumably!) V8 JavaScript Engine
