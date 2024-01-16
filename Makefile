@@ -10,15 +10,16 @@ TARGET = out/winx
 
 .PHONY: clean
 
-embedded_winx_polyfill: $(TARGET)
-	@xxd -i $(SRCDIR)/polyfills/Winx.js > $(SRCDIR)/embedded_winx_polyfill.h
-
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp embedded_winx_polyfill
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
+embedded_winx_polyfill: 
+	@xxd -i $(SRCDIR)/polyfills/Winx.js > $(SRCDIR)/embedded_winx_polyfill.h
+
 clean:
 	@rm -rf $(OBJDIR) $(TARGET)
+	@rm $(SRCDIR)/embedded_winx_polyfill.h
