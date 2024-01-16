@@ -8,7 +8,7 @@
 #include <toml.h>
 #include <v8.h>
 
-#include "WinxConfig.hpp"
+#include "winx_config.hpp"
 #include "bindings/winx_console.hpp"
 #include "bindings/winx_fs.hpp"
 #include "bindings/winx_os.hpp"

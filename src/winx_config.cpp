@@ -1,7 +1,7 @@
 #ifndef WINXCONFIG_CPP
 #define WINXCONFIG_CPP
 
-#include "WinxConfig.hpp"
+#include "winx_config.hpp"
 
 namespace WinxConfig {
 
