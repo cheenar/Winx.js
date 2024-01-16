@@ -1,3 +1,4 @@
+```
 The following syntax for options is accepted (both '-' and '--' are ok):
   --flag        (bool flags only)
   --no-flag     (bool flags only)
@@ -1546,3 +1547,4 @@ Options:
         type: bool  default: --no-verify-predictable
   --dump-allocations-digest-at-alloc (dump allocations digest each n-th allocation)
         type: int  default: --dump-allocations-digest-at-alloc=-1
+```
