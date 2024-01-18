@@ -18,6 +18,25 @@
 #include "winx_util.hpp"
 
 bool kIsDebugModeEnabled;
+std::string embeddedRequest;
+
+void RequestAccessor(v8::Local<v8::String> property,
+                     const v8::PropertyCallbackInfo<v8::Value>& info) {
+  // Access the isolate and context
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+
+  // Parse the JSON string
+  v8::Local<v8::String> request =
+      v8::String::NewFromUtf8(isolate, embeddedRequest.c_str(),
+                              v8::NewStringType::kNormal)
+          .ToLocalChecked();
+  v8::Local<v8::Value> json =
+      v8::JSON::Parse(context, request).ToLocalChecked();
+
+  // Set the property in the object
+  info.GetReturnValue().Set(json);
+}
 
 int internal_main(int argc, char* argv[]) {
   std::string filename;
@@ -26,6 +45,7 @@ int internal_main(int argc, char* argv[]) {
   bool IS_DEBUG;
   app.add_flag("-D,--debug", IS_DEBUG, "Enable debug mode (default: false)")
       ->default_val(false);
+  app.add_option("-r,--request", embeddedRequest, "A JSON to pass the runtime");
   app.add_option("filename", filename, "The program needed to execute")
       ->required();
   CLI11_PARSE(app, argc, argv);
@@ -91,6 +111,14 @@ int internal_main(int argc, char* argv[]) {
     winx->Set(isolate, "os", os);
     global->Set(isolate, "Winx", winx);
 
+    // TODO: This is hacky, may remove at some point
+    if (!embeddedRequest.empty()) {
+      global->SetAccessor(v8::String::NewFromUtf8(isolate, "request",
+                                                  v8::NewStringType::kNormal)
+                              .ToLocalChecked(),
+                          RequestAccessor);
+    }
+
     v8::Local<v8::Context> context = v8::Context::New(isolate, NULL, global);
     // Enter the context for compiling and running the hello world script.
     v8::Context::Scope context_scope(context);
@@ -140,6 +168,5 @@ int internal_main(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
   internal_main(argc, argv);
 }
-
 
 #endif  // WINX_MAIN
