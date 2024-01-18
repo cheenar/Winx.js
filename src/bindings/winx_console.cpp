@@ -6,7 +6,7 @@ static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
 namespace Winx::Bindings::Console {
 
 void log(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  formatted_print(args, "Winx 🦋");
+  formatted_print(args, "log");
 }
 
 void debug(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -26,11 +26,7 @@ static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
   if (prefix == "") {
     std::cout << *message << std::endl;
   } else {
-    std::cout << "[" << termcolor::on_magenta << termcolor::bold
-              << termcolor::white << prefix << termcolor::reset << "] "
-              << *message << std::endl;
+    std::cout << "[" << termcolor::magenta << termcolor::bold << prefix
+              << termcolor::reset << "] " << *message << std::endl;
   }
 }
-
-// ../obj/winx.o  ../obj//winx_config.o  ../obj//bindings/winx_console.o
-// obj//winx_util.o
