@@ -26,7 +26,12 @@ WinxFileHandle* open_file(std::string file_name, std::string mode) {
   if (mode.find("w") != std::string::npos) {
     file_handle->out = new std::ofstream(file_name.c_str());
   } else {
-    file_handle->out = nullptr;
+    if (mode.find("a") != std::string::npos) {
+      file_handle->out =
+          new std::ofstream(file_name.c_str(), std::ios_base::app);
+    } else {
+      file_handle->out = nullptr;
+    }
   }
 
   return file_handle;
