@@ -14,11 +14,11 @@
 #include "bindings/winx_os.hpp"
 #include "embedded_winx_polyfill.h"
 #include "winx_config.hpp"
+#include "winx_globals.hpp"
 #include "winx_platform.hpp"
 #include "winx_util.hpp"
 
-bool kIsDebugModeEnabled;
-
+extern bool IS_DEBUG_MODE_ENABLED;
 extern unsigned int src_polyfills_Winx_js_len;
 extern unsigned char src_polyfills_Winx_js[];
 
@@ -41,7 +41,6 @@ class WinxEngine {
   std::string program_file;
   std::string program_emebdded_request;
   std::string external_polyfill_bootstrapper;
-  bool is_debug_mode_enabled;
 
   v8::Isolate* isolate;
   v8::Isolate::CreateParams create_params;
@@ -111,12 +110,10 @@ class WinxEngine {
  public:
   WinxEngine(std::string program_file,
              std::string program_embedded_request,
-             std::string external_polyfill_bootstrapper,
-             bool is_debug_mode_enabled) {
+             std::string external_polyfill_bootstrapper) {
     this->program_file = program_file;
     this->program_emebdded_request = program_embedded_request;
     this->external_polyfill_bootstrapper = external_polyfill_bootstrapper;
-    this->is_debug_mode_enabled = is_debug_mode_enabled;
 
     this->InitializeEngine();
   }
@@ -214,23 +211,23 @@ void EmbeddedRequestGetterAccessor(
 
 int internal_main(int argc, char* argv[]) {
   std::string filename;
-  std::string embeddedRequest;
-  bool IS_DEBUG;
+  std::string environment_embedded_request;
 
   CLI::App app{"Winx - A V8-based JavaScript runtime for Macintosh."};
-  app.add_flag("-D,--debug", IS_DEBUG, "Enable debug mode (default: false)")
+  app.add_flag("-D,--debug", IS_DEBUG_MODE_ENABLED,
+               "Enable debug mode (default: false)")
       ->default_val(false);
-  app.add_option("-r,--request", embeddedRequest, "A JSON to pass the runtime");
+  app.add_option("-r,--request", environment_embedded_request,
+                 "A JSON to pass the runtime");
   app.add_option("filename", filename, "The program needed to execute")
       ->required();
   CLI11_PARSE(app, argc, argv);
-  kIsDebugModeEnabled = IS_DEBUG;
 
   std::string program_file = Winx::Util::read_file(filename);
   std::string bootstrapper =
       Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
-  WinxEngine engine(program_file, embeddedRequest, bootstrapper, true);
+  WinxEngine engine(program_file, environment_embedded_request, bootstrapper);
   engine.RunProgram();
   engine.DisposeEngine();
   return 0;

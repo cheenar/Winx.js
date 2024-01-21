@@ -10,8 +10,9 @@ std::string read_file(std::string source) {
 }
 
 void debug_print(std::string prefix, std::string message) {
-  if (!kIsDebugModeEnabled)
+  if (!IS_DEBUG_MODE_ENABLED) {
     return;
+  }
   std::cout << "[" << termcolor::bold << termcolor::magenta << prefix
             << termcolor::reset << "]: " << message << std::endl;
 }

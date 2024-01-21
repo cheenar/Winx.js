@@ -6,7 +6,9 @@
 #include <string>
 #include <termcolor/termcolor.hpp>
 
-extern bool kIsDebugModeEnabled;
+#include "winx_globals.hpp"
+
+extern bool IS_DEBUG_MODE_ENABLED;
 
 namespace Winx::Util {
 std::string read_file(std::string source);

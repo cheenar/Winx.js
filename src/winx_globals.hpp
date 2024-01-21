@@ -1,6 +1,6 @@
 #ifndef __WINX_GLOBALS_HPP__
 #define __WINX_GLOBALS_HPP__
 
-extern bool kIsDebugModeEnabled;
+extern bool IS_DEBUG_MODE_ENABLED;
 
 #endif  // __WINX_GLOBALS_HPP__

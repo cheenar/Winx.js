@@ -23,7 +23,7 @@ static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,
   }
   v8::String::Utf8Value message(isolate, args[0]);
 
-  if (prefix == "") {
+  if (prefix.empty()) {
     std::cout << *message << std::endl;
   } else {
     std::cout << "[" << termcolor::magenta << termcolor::bold << prefix
