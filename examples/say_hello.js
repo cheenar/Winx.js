@@ -1,4 +1,9 @@
-import { say_hello } from "./examples/lib.mjs"
+import { colorize, gradientize } from "./colorizer.mjs";
 
-let my_name = Winx.os.stdin("What is your name?: ")
-Winx.console.log(say_hello(my_name));
+let my_name = Winx.os.stdin(
+  `${colorize.bold()
+    .bg_bright_yellow()
+    .black()
+    .compile("What is your name?")}: `
+)
+console.log(gradientize(`Hello, ${my_name}!`, 70, 3, false))

@@ -3,6 +3,7 @@
 
 #include <v8.h>
 #include <string>
+#include "winx_config.hpp"
 #include "winx_util.hpp"
 
 using namespace std;

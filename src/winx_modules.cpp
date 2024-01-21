@@ -91,6 +91,20 @@ MaybeLocal<Module> Winx::Modules::ResolveModuleCallback(
     Local<Module> referrer) {
   Isolate* isolate = context->GetIsolate();
   String::Utf8Value specifier_string(isolate, specifier);
+
+  // Doing some module path resolution
+  // TODO: Figure out better way to handle path names like in Java#PATH
+  auto modules_folder = WinxConfig::get_winx_flag("modules_folder");
+  if (modules_folder.at(modules_folder.length() - 1) != '/') {
+    modules_folder += "/";
+  }
+  auto requested_module_path = string(*specifier_string);
+  if (requested_module_path.substr(0, 2) == "./") {
+    requested_module_path = requested_module_path.substr(2);
+  }
+  modules_folder += requested_module_path;
+  Winx::Util::debug_print("Modules", "Loading Module: " + modules_folder);
+
   return LoadModule(context, *specifier_string,
-                    Winx::Util::read_file(*specifier_string));
+                    Winx::Util::read_file(modules_folder));
 }
