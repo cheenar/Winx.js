@@ -15,6 +15,7 @@
 #include "embedded_winx_polyfill.h"
 #include "winx_config.hpp"
 #include "winx_globals.hpp"
+#include "winx_modules.hpp"
 #include "winx_platform.hpp"
 #include "winx_util.hpp"
 
@@ -60,6 +61,10 @@ class WinxEngine {
     create_params.array_buffer_allocator =
         v8::ArrayBuffer::Allocator::NewDefaultAllocator();
     v8::Isolate* isolate = v8::Isolate::New(create_params);
+
+    isolate->SetHostImportModuleDynamicallyCallback(
+        Winx::Modules::ResolveDynamicModuleCallback);
+
     this->create_params = create_params;
     this->isolate = isolate;
   }
@@ -95,14 +100,21 @@ class WinxEngine {
           v8::Script::Compile(context, initial_runtime).ToLocalChecked();
       initial_runtime_script->Run(context).ToLocalChecked();
 
-      v8::Local<v8::String> source_code =
-          v8::String::NewFromUtf8(isolate, program_file.c_str(),
-                                  v8::NewStringType::kNormal)
-              .ToLocalChecked();
-      v8::Local<v8::Script> script =
-          v8::Script::Compile(context, source_code).ToLocalChecked();
-      auto script_result = script->Run(context).ToLocalChecked();
-      v8::String::Utf8Value utf8(isolate, script_result);
+      auto module = Winx::Modules::CheckModule(
+          context, Winx::Modules::LoadModule(
+                       context, program_file,
+                       Winx::Util::read_file(program_file).c_str()));
+      Winx::Modules::ExecuteModule(context, module);
+
+      // TODO: Do we need module-less support?
+      // v8::Local<v8::String> source_code =
+      //     v8::String::NewFromUtf8(isolate, program_file.c_str(),
+      //                             v8::NewStringType::kNormal)
+      //         .ToLocalChecked();
+      // v8::Local<v8::Script> script =
+      //     v8::Script::Compile(context, source_code).ToLocalChecked();
+      // auto script_result = script->Run(context).ToLocalChecked();
+      // v8::String::Utf8Value utf8(isolate, script_result);
       // std::cout << "Result: " << *utf8 << std::endl;
     }
   }
@@ -200,11 +212,10 @@ int internal_main(int argc, char* argv[]) {
       ->required();
   CLI11_PARSE(app, argc, argv);
 
-  std::string program_file = Winx::Util::read_file(filename);
   std::string bootstrapper =
       Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
 
-  WinxEngine engine(program_file, environment_embedded_request, bootstrapper);
+  WinxEngine engine(filename, environment_embedded_request, bootstrapper);
   engine.RunProgram();
   engine.DisposeEngine();
   return 0;
