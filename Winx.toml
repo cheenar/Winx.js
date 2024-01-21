@@ -1,5 +1,6 @@
 [v8]
-max-heap-size = 2048
+max-heap-size = 8192
+max-old-space-size = 2048
 jitless = false
 gc-experiment-less-compaction = true
 expose-wasm = false

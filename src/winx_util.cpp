@@ -3,10 +3,22 @@
 namespace Winx::Util {
 
 std::string read_file(std::string source) {
-  std::ifstream file_stream(source.c_str());
-  std::string raw((std::istreambuf_iterator<char>(file_stream)),
-                  (std::istreambuf_iterator<char>()));
-  return raw;
+  // std::ifstream file_stream(source.c_str());
+  // std::string raw((std::istreambuf_iterator<char>(file_stream)),
+  //                 (std::istreambuf_iterator<char>()));
+  // return raw;
+  using namespace std;
+  ifstream file(source, ios::in | ios::binary | ios::ate);
+  if (file.is_open()) {
+    file.seekg(0, ios::end);
+    int size = file.tellg();
+    char* contents = new char[size];
+    file.seekg(0, ios::beg);
+    file.read(contents, size);
+    file.close();
+    return string(contents, size);
+  }
+  return "";
 }
 
 void write_file(std::string file_name, std::string data) {

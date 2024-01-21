@@ -42,3 +42,4 @@ out/winx
 *.app
 
 embedded*.h
+test.dat
