@@ -1,3 +1,3 @@
 let file = "./examples/hello_libuv.js"
-let result = Winx.fs.read_file(file);
-Winx.console.debug("Outputting [" + file + "]\n" + result)
+let file_handle = Winx.fs.open(file, "r");
+console.log(file_handle.read());
