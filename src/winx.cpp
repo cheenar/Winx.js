@@ -107,6 +107,12 @@ class WinxEngine {
     }
   }
 
+  void SetupBinding(v8::Local<v8::ObjectTemplate> parent,
+                    v8::Local<v8::ObjectTemplate> object,
+                    std::string object_name) {
+    parent->Set(isolate, object_name.c_str(), object);
+  }
+
  public:
   WinxEngine(std::string program_file,
              std::string program_embedded_request,
@@ -123,40 +129,14 @@ class WinxEngine {
   void RunProgram() {
     v8::Isolate* isolate = this->isolate;
     v8::Isolate::Scope isolate_scope(isolate);
-    // Create a stack-allocated handle scope.
     v8::HandleScope handle_scope(isolate);
-    // Create a new context.
     v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
-    // create a prototype method on the global
     v8::Local<v8::ObjectTemplate> winx = v8::ObjectTemplate::New(isolate);
 
-    v8::Local<v8::ObjectTemplate> console = v8::ObjectTemplate::New(isolate);
-    v8::Local<v8::ObjectTemplate> os = v8::ObjectTemplate::New(isolate);
-
-    console->Set(
-        isolate, "log",
-        v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::log));
-    console->Set(
-        isolate, "debug",
-        v8::FunctionTemplate::New(isolate, Winx::Bindings::Console::debug));
-
-    winx->Set(isolate, "readFile",
-              v8::FunctionTemplate::New(isolate,
-                                        Winx::Bindings::FileSystem::read_file));
-
-    os->Set(isolate, "getFreeMemory",
-            v8::FunctionTemplate::New(isolate,
-                                      Winx::Bindings::Os::get_free_memory));
-
-    os->Set(isolate, "getTotalMemory",
-            v8::FunctionTemplate::New(isolate,
-                                      Winx::Bindings::Os::get_total_memory));
-    os->Set(isolate, "stdin",
-            v8::FunctionTemplate::New(isolate, Winx::Bindings::Os::prompt));
-
-    winx->Set(isolate, "console", console);
-    winx->Set(isolate, "os", os);
-    global->Set(isolate, "Winx", winx);
+    SetupBinding(winx, Winx::Bindings::Console::EngineBind(isolate), "console");
+    SetupBinding(winx, Winx::Bindings::FileSystem::EngineBind(isolate), "fs");
+    SetupBinding(winx, Winx::Bindings::Os::EngineBind(isolate), "os");
+    SetupBinding(global, winx, "Winx");
 
     if (!this->program_emebdded_request.empty()) {
       global->SetAccessor(v8::String::NewFromUtf8(isolate, "request",
@@ -192,11 +172,9 @@ void EmbeddedRequestGetterAccessor(
   WinxEngine* winxEngine =
       static_cast<WinxEngine*>(externalWinxEngine->Value());
 
-  // Access the isolate and context
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-  // Parse the JSON string
   v8::Local<v8::String> request =
       v8::String::NewFromUtf8(isolate,
                               winxEngine->GetEmebeddedRequest().c_str(),
@@ -205,7 +183,6 @@ void EmbeddedRequestGetterAccessor(
   v8::Local<v8::Value> json =
       v8::JSON::Parse(context, request).ToLocalChecked();
 
-  // Set the property in the object
   info.GetReturnValue().Set(json);
 }
 

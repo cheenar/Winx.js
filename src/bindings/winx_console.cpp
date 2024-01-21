@@ -13,6 +13,13 @@ void debug(const v8::FunctionCallbackInfo<v8::Value>& args) {
   formatted_print(args, "debug");
 }
 
+v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate* isolate) {
+  v8::Local<v8::ObjectTemplate> console = create_winx_object_binding(isolate);
+  create_winx_function_binding(isolate, console, "log", log);
+  create_winx_function_binding(isolate, console, "debug", debug);
+  return console;
+}
+
 }  // namespace Winx::Bindings::Console
 
 static void formatted_print(const v8::FunctionCallbackInfo<v8::Value>& args,

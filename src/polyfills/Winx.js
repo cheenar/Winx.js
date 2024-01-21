@@ -29,5 +29,5 @@ These polyfills enable Node APIs for performance testing
 --------------------------------------------------------
 */
 os = {}
-os.totalmem = Winx.os.getTotalMemory
-os.freemem = Winx.os.getFreeMemory
+os.totalmem = Winx.os.get_total_memory
+os.freemem = Winx.os.get_free_memory

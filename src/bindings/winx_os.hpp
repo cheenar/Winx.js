@@ -4,6 +4,7 @@
 #include <uv.h>
 #include <v8.h>
 #include <iostream>
+#include "winx_binding.hpp"
 
 namespace Winx::Bindings::Os {
 
@@ -41,6 +42,15 @@ static void prompt(const v8::FunctionCallbackInfo<v8::Value>& args) {
                                                     prompt_data.c_str(),
                                                     v8::NewStringType::kNormal)
                                 .ToLocalChecked());
+}
+
+v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate* isolate) {
+  v8::Local<v8::ObjectTemplate> os = create_winx_object_binding(isolate);
+  create_winx_function_binding(isolate, os, "get_free_memory", get_free_memory);
+  create_winx_function_binding(isolate, os, "get_total_memory",
+                               get_total_memory);
+  create_winx_function_binding(isolate, os, "stdin", prompt);
+  return os;
 }
 
 }  // namespace Winx::Bindings::Os
