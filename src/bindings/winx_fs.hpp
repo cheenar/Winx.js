@@ -20,9 +20,20 @@ void read_file(const v8::FunctionCallbackInfo<v8::Value>& args) {
                                 .ToLocalChecked());
 }
 
+void write_file(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  if (args.Length() < 2) {
+    return;
+  }
+  v8::String::Utf8Value file_path(isolate, args[0]);
+  v8::String::Utf8Value file_data(isolate, args[1]);
+  Winx::Util::write_file(*file_path, *file_data);
+}
+
 v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate* isolate) {
   v8::Local<v8::ObjectTemplate> fs = create_winx_object_binding(isolate);
   create_winx_function_binding(isolate, fs, "read_file", read_file);
+  create_winx_function_binding(isolate, fs, "write_file", write_file);
   return fs;
 }
 

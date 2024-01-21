@@ -9,6 +9,12 @@ std::string read_file(std::string source) {
   return raw;
 }
 
+void write_file(std::string file_name, std::string data) {
+  std::ofstream file_stream(file_name.c_str());
+  file_stream << data;
+  file_stream.close();
+}
+
 void debug_print(std::string prefix, std::string message) {
   if (!IS_DEBUG_MODE_ENABLED) {
     return;
