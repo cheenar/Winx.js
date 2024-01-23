@@ -80,3 +80,5 @@ Winx.console.debug("Hello World!");
 ## Node & Web API Compatibility
 
 In [Winx.js](./src/polyfills/Winx.js), there are some "polyfills" that provide Node and Web-like APIs for cross-runtime compatiblity. Initially, focus is spent on getting Winx's capabilities up to par with similar runtimes, and compatibility will follow. For performance testing, some examples are duplicated and implemented in Node.js or Bun.sh compatible APIs. 
+
+The polyfills are now generated via a make-shift bundler. The bundler does a naive sweep of the `Winx.js.template` and generates a bundled file. There is no intelligent parsing that generates the file, so it's restricted to only whole file composition. In the future, I want to make it parse the file and insert the imports as needed.

@@ -5,6 +5,7 @@ import re
 IMPORT_STATEMENT_REGEX = re.compile(r'import \"(.*?)\"')
 POLYFILL_DIRECTORY = "polyfills/"
 TEMPLATE_FILE = "Winx.js.template" 
+IS_DIFF_MODE = True
 
 def read_file(filename):
   try:
@@ -20,8 +21,11 @@ def main():
   for import_statement in imports:
     polyfill = read_file(import_statement)
     template = template.replace("import \"" + import_statement + "\"", polyfill)
-  with open("polyfills/Winx.js", "w") as winx:
-    winx.write(template)
+  if IS_DIFF_MODE:
+    print(template)
+  else:
+    with open("polyfills/Winx.js", "w") as winx:
+      winx.write(template)
 
 
 if __name__ == "__main__":
