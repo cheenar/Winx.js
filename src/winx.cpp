@@ -13,7 +13,7 @@ void WinxEngine::InitializeEngine()
     V8::InitializeExternalStartupData(nullptr);
     this->platform = platform::NewDefaultPlatform();
     V8::InitializePlatform(this->platform.get());
-    V8::SetFlagsFromString(WinxConfig::get_v8_flags().c_str());
+    V8::SetFlagsFromString(Winx::Config::get_v8_flags().c_str());
     V8::Initialize();
 
     Isolate::CreateParams create_params;
@@ -165,7 +165,7 @@ int internal_main(int argc, char *argv[])
     app.add_option("filename", filename, "The program needed to execute")->required();
     CLI11_PARSE(app, argc, argv);
 
-    string bootstrapper = Winx::Util::read_file(WinxConfig::get_winx_flag("polyfills_file"));
+    string bootstrapper = Winx::Util::read_file(Winx::Config::get_winx_flag(WINX_CONFIG_POLYFILLS));
 
     Winx::WinxEngine engine(filename, environment_embedded_request, bootstrapper);
     engine.RunProgram();
