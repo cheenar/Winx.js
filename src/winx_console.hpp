@@ -10,8 +10,6 @@
 #include "winx_binding.hpp"
 #include "winx_globals.hpp"
 
-extern bool IS_DEBUG_MODE_ENABLED;
-
 /**
  * @brief Produces a formatted print output with debug flags enabled.
  *

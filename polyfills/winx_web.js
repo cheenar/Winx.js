@@ -9,4 +9,9 @@ const formatted = (number, sig_digits = 2) => {
 
 // Basic math extension
 Winx.math = {}
-Winx.math.round = formatted
+Object.defineProperties(Winx.math, {
+  round: {
+    value: formatted,
+    writable: false
+  }
+})

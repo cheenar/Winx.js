@@ -5,17 +5,30 @@
 These polyfills enable Node APIs for performance testing
 --------------------------------------------------------
 */
-os = {}
-os.totalmem = Winx.os.get_total_memory
-os.freemem = Winx.os.get_free_memory
+Winx.node = {}
+Object.defineProperties(Winx.node, {
+  fs: {
+    value: {
+      readFileSync: Winx.fs.blind_read_file,
+      writeFileSync: Winx.fs.blind_write_file
+    },
+    writable: false
+  },
+  os: {
+    value: {
+      totalmem: Winx.os.get_total_memory,
+      freemem: Winx.os.get_free_memory
+    },
+    writable: false
+  }
+});
 
-Node = {}
-Node.fs = {}
-Node.fs.readFileSync = Winx.fs.blind_read_file
-Node.fs.writeFileSync = Winx.fs.blind_write_file
+Winx.node.modules = {
+  "fs": Winx.node.fs,
+  "os": Winx.node.os
+}
 
 function require(module) {
-  if (module === "node:fs") {
-    return Node.fs;
-  }
+  nodeless_module = module.replace("node:", "");
+  return Winx.node.modules[nodeless_module];
 }

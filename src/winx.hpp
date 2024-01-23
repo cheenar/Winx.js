@@ -19,9 +19,6 @@
 #include "winx_util.hpp"
 #include <cli11/CLI11.hpp>
 
-// TODO: This is a hacky way to set the global debug flag.
-extern bool IS_DEBUG_MODE_ENABLED;
-
 extern unsigned int polyfills_Winx_js_len;
 extern unsigned char polyfills_Winx_js[];
 
