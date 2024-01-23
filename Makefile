@@ -17,8 +17,11 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp embedded_winx_polyfill
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-embedded_winx_polyfill: 
+embedded_winx_polyfill: bundle_winx
 	@xxd -i polyfills/Winx.js > $(SRCDIR)/embedded_winx_polyfill.h
+
+bundle_winx:
+	@./winx_bundler.py
 
 clean:
 	@rm -rf $(OBJDIR) $(TARGET)
