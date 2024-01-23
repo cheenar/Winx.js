@@ -1,12 +1,6 @@
-#ifndef WINX_MAIN
-#define WINX_MAIN
-
 #include "winx.hpp"
 
-namespace Winx
-{
-
-void WinxEngine::InitializeEngine()
+void Winx::WinxEngine::InitializeEngine()
 {
     // argv[0]
     V8::InitializeICUDefaultLocation(nullptr);
@@ -26,7 +20,7 @@ void WinxEngine::InitializeEngine()
     this->isolate = isolate;
 }
 
-void WinxEngine::ExecuteScript()
+void Winx::WinxEngine::ExecuteScript()
 {
     Context::Scope context_scope(this->context);
     {
@@ -69,12 +63,13 @@ void WinxEngine::ExecuteScript()
     }
 }
 
-void WinxEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
+void Winx::WinxEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
 {
     parent->Set(isolate, object_name.c_str(), object);
 }
 
-WinxEngine::WinxEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper)
+Winx::WinxEngine::WinxEngine(string program_file, string program_embedded_request,
+                             string external_polyfill_bootstrapper)
 {
     this->program_file = program_file;
     this->program_emebdded_request = program_embedded_request;
@@ -83,12 +78,12 @@ WinxEngine::WinxEngine(string program_file, string program_embedded_request, str
     this->InitializeEngine();
 }
 
-string WinxEngine::GetEmebeddedRequest()
+string Winx::WinxEngine::GetEmebeddedRequest()
 {
     return this->program_emebdded_request;
 }
 
-void WinxEngine::RunProgram()
+void Winx::WinxEngine::RunProgram()
 {
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
@@ -112,7 +107,7 @@ void WinxEngine::RunProgram()
     this->ExecuteScript();
 }
 
-void WinxEngine::DisposeEngine()
+void Winx::WinxEngine::DisposeEngine()
 {
     this->isolate->Dispose();
     V8::Dispose();
@@ -120,7 +115,7 @@ void WinxEngine::DisposeEngine()
     delete this->create_params.array_buffer_allocator;
 }
 
-string GetEmbeddedPolyfillData()
+string Winx::GetEmbeddedPolyfillData()
 {
     char *poly_data = (char *)malloc(sizeof(char) * (polyfills_Winx_js_len + 1));
     for (int i = 0; i < polyfills_Winx_js_len; i++)
@@ -131,7 +126,7 @@ string GetEmbeddedPolyfillData()
     return string(poly_data);
 }
 
-void EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info)
+void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info)
 {
     Local<External> externalWinxEngine =
         info.This()
@@ -152,7 +147,9 @@ void EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbac
     info.GetReturnValue().Set(json);
 }
 
-} // namespace Winx
+/*--------------------*/
+/* The Main Functions */
+/*--------------------*/
 
 int internal_main(int argc, char *argv[])
 {
@@ -177,5 +174,3 @@ int main(int argc, char *argv[])
 {
     internal_main(argc, argv);
 }
-
-#endif // WINX_MAIN
