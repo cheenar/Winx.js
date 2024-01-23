@@ -1,5 +1,5 @@
-#ifndef WINX_FS_HPP
-#define WINX_FS_HPP
+#ifndef __SRC__WINX_FS__HPP_
+#define __SRC__WINX_FS__HPP_
 
 #include <v8.h>
 
@@ -7,56 +7,72 @@
 #include "winx_util.hpp"
 
 using namespace v8;
+using Winx::Util::WinxFileHandle;
 
 namespace Winx::Bindings::FileSystem
 {
 
-// Handle-less Functions
+void read_file(const FunctionCallbackInfo<Value> &args);
 
-void read_file(const v8::FunctionCallbackInfo<v8::Value> &args)
+void write_file(const FunctionCallbackInfo<Value> &args);
+
+void delete_file(const FunctionCallbackInfo<Value> &args);
+
+Local<ObjectTemplate> winx_file_handle_template(Isolate *isolate);
+
+Local<Object> wrap_file_handle(Isolate *isolate, WinxFileHandle *file_handle);
+
+WinxFileHandle unwrap_file_handle(Local<Object> obj);
+
+void winx_file_handle_open(const FunctionCallbackInfo<Value> &args);
+
+void winx_file_handle_read(const FunctionCallbackInfo<Value> &args);
+
+void winx_file_handle_write(const FunctionCallbackInfo<Value> &args);
+
+void winx_file_handle_close(const FunctionCallbackInfo<Value> &args);
+
+Local<ObjectTemplate> EngineBind(Isolate *isolate);
+
+} // namespace Winx::Bindings::FileSystem
+
+void Winx::Bindings::FileSystem::read_file(const FunctionCallbackInfo<Value> &args)
 {
-    v8::Isolate *isolate = args.GetIsolate();
+    Isolate *isolate = args.GetIsolate();
     if (args.Length() < 1)
     {
         return;
     }
-    v8::String::Utf8Value filePath(isolate, args[0]);
+    String::Utf8Value filePath(isolate, args[0]);
     auto fileData = Winx::Util::read_file(std::string(*filePath));
     args.GetReturnValue().Set(
-        v8::String::NewFromUtf8(isolate, fileData.c_str(), v8::NewStringType::kNormal, fileData.size())
-            .ToLocalChecked());
+        String::NewFromUtf8(isolate, fileData.c_str(), NewStringType::kNormal, fileData.size()).ToLocalChecked());
 }
 
-void write_file(const v8::FunctionCallbackInfo<v8::Value> &args)
+void Winx::Bindings::FileSystem::write_file(const FunctionCallbackInfo<Value> &args)
 {
-    v8::Isolate *isolate = args.GetIsolate();
+    Isolate *isolate = args.GetIsolate();
     if (args.Length() < 2)
     {
         return;
     }
-    v8::String::Utf8Value file_path(isolate, args[0]);
-    v8::String::Utf8Value file_data(isolate, args[1]);
+    String::Utf8Value file_path(isolate, args[0]);
+    String::Utf8Value file_data(isolate, args[1]);
     Winx::Util::write_file(*file_path, *file_data);
 }
 
-void delete_file(const v8::FunctionCallbackInfo<v8::Value> &args)
+void Winx::Bindings::FileSystem::delete_file(const FunctionCallbackInfo<Value> &args)
 {
-    v8::Isolate *isolate = args.GetIsolate();
+    Isolate *isolate = args.GetIsolate();
     if (args.Length() < 1)
     {
         return;
     }
-    v8::String::Utf8Value file_path(isolate, args[0]);
+    String::Utf8Value file_path(isolate, args[0]);
     std::remove(*file_path);
 }
 
-// Wrapping the WinxFileHandler...
-
-void winx_file_handle_read(const FunctionCallbackInfo<Value> &args);
-void winx_file_handle_write(const FunctionCallbackInfo<Value> &args);
-void winx_file_handle_close(const FunctionCallbackInfo<Value> &args);
-
-Local<ObjectTemplate> winx_file_handle_template(Isolate *isolate)
+Local<ObjectTemplate> Winx::Bindings::FileSystem::winx_file_handle_template(Isolate *isolate)
 {
     EscapableHandleScope handle_scope(isolate);
 
@@ -74,7 +90,7 @@ Local<ObjectTemplate> winx_file_handle_template(Isolate *isolate)
     return handle_scope.Escape(file_handle_template);
 }
 
-Local<Object> wrap_file_handle(Isolate *isolate, Winx::Util::WinxFileHandle *file_handle)
+Local<Object> Winx::Bindings::FileSystem::wrap_file_handle(Isolate *isolate, WinxFileHandle *file_handle)
 {
     EscapableHandleScope handle_scope(isolate);
 
@@ -85,49 +101,47 @@ Local<Object> wrap_file_handle(Isolate *isolate, Winx::Util::WinxFileHandle *fil
     return handle_scope.Escape(result);
 }
 
-Winx::Util::WinxFileHandle unwrap_file_handle(Local<Object> obj)
+WinxFileHandle Winx::Bindings::FileSystem::unwrap_file_handle(Local<Object> obj)
 {
     Local<External> field = Local<External>::Cast(obj->GetInternalField(0));
     void *ptr = field->Value();
-    return *static_cast<Winx::Util::WinxFileHandle *>(ptr);
+    return *static_cast<WinxFileHandle *>(ptr);
 }
 
-void winx_file_handle_open(const FunctionCallbackInfo<Value> &args)
+void Winx::Bindings::FileSystem::winx_file_handle_open(const FunctionCallbackInfo<Value> &args)
 {
     Isolate *isolate = args.GetIsolate();
     String::Utf8Value file_name(isolate, args[0]);
     String::Utf8Value mode(isolate, args[1]);
-    Winx::Util::WinxFileHandle *file_handle = Winx::Util::open_file(*file_name, *mode);
+    WinxFileHandle *file_handle = Winx::Util::open_file(*file_name, *mode);
     args.GetReturnValue().Set(wrap_file_handle(isolate, file_handle));
 }
 
-void winx_file_handle_read(const FunctionCallbackInfo<Value> &args)
+void Winx::Bindings::FileSystem::winx_file_handle_read(const FunctionCallbackInfo<Value> &args)
 {
     Isolate *isolate = args.GetIsolate();
-    Winx::Util::WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
+    WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
     std::string file_data = Winx::Util::read_file(file_handle);
     args.GetReturnValue().Set(String::NewFromUtf8(isolate, file_data.c_str(), NewStringType::kNormal).ToLocalChecked());
 }
 
-void winx_file_handle_write(const FunctionCallbackInfo<Value> &args)
+void Winx::Bindings::FileSystem::winx_file_handle_write(const FunctionCallbackInfo<Value> &args)
 {
     Isolate *isolate = args.GetIsolate();
-    Winx::Util::WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
+    WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
     String::Utf8Value file_data(isolate, args[0]);
     Winx::Util::write_file(file_handle, *file_data);
 }
 
-void winx_file_handle_close(const FunctionCallbackInfo<Value> &args)
+void Winx::Bindings::FileSystem::winx_file_handle_close(const FunctionCallbackInfo<Value> &args)
 {
-    Winx::Util::WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
+    WinxFileHandle file_handle = unwrap_file_handle(args.Holder());
     Winx::Util::close_file(file_handle);
 }
 
-// Engine Bindings...
-
-v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate)
+Local<ObjectTemplate> Winx::Bindings::FileSystem::EngineBind(Isolate *isolate)
 {
-    v8::Local<v8::ObjectTemplate> fs = Winx::Binding::create_winx_object_binding(isolate);
+    Local<ObjectTemplate> fs = Winx::Binding::create_winx_object_binding(isolate);
     Winx::Binding::create_winx_function_binding(isolate, fs, "blind_read_file", read_file);
     Winx::Binding::create_winx_function_binding(isolate, fs, "blind_write_file", write_file);
     Winx::Binding::create_winx_function_binding(isolate, fs, "delete", delete_file);
@@ -135,6 +149,4 @@ v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate)
     return fs;
 }
 
-} // namespace Winx::Bindings::FileSystem
-
-#endif // WINX_FS_HPP
+#endif // __SRC__WINX_FS__HPP_
