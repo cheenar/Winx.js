@@ -9,27 +9,26 @@
 #include <v8.h>
 
 #include <cli11/CLI11.hpp>
-#include "bindings/winx_console.hpp"
-#include "bindings/winx_fs.hpp"
-#include "bindings/winx_os.hpp"
 #include "embedded_winx_polyfill.h"
 #include "winx_config.hpp"
+#include "winx_console.hpp"
+#include "winx_fs.hpp"
 #include "winx_globals.hpp"
 #include "winx_modules.hpp"
+#include "winx_os.hpp"
 #include "winx_platform.hpp"
 #include "winx_util.hpp"
 
 extern bool IS_DEBUG_MODE_ENABLED;
-extern unsigned int src_polyfills_Winx_js_len;
-extern unsigned char src_polyfills_Winx_js[];
+extern unsigned int polyfills_Winx_js_len;
+extern unsigned char polyfills_Winx_js[];
 
 std::string GetEmbeddedPolyfillData() {
-  char* poly_data =
-      (char*)malloc(sizeof(char) * (src_polyfills_Winx_js_len + 1));
-  for (int i = 0; i < src_polyfills_Winx_js_len; i++) {
-    poly_data[i] = src_polyfills_Winx_js[i];
+  char* poly_data = (char*)malloc(sizeof(char) * (polyfills_Winx_js_len + 1));
+  for (int i = 0; i < polyfills_Winx_js_len; i++) {
+    poly_data[i] = polyfills_Winx_js[i];
   }
-  poly_data[src_polyfills_Winx_js_len] = '\0';
+  poly_data[polyfills_Winx_js_len] = '\0';
   return std::string(poly_data);
 }
 

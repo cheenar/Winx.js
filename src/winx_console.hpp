@@ -7,8 +7,8 @@
 #include <string>
 #include <termcolor/termcolor.hpp>
 
-#include "../winx_globals.hpp"
 #include "winx_binding.hpp"
+#include "winx_globals.hpp"
 
 extern bool IS_DEBUG_MODE_ENABLED;
 

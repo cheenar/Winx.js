@@ -3,8 +3,8 @@
 
 #include <v8.h>
 
-#include "../winx_util.hpp"
 #include "winx_binding.hpp"
+#include "winx_util.hpp"
 
 using namespace v8;
 

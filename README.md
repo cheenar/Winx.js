@@ -24,7 +24,8 @@ gc-experiment-less-compaction = true
 expose-wasm = false
 
 [winx]
-polyfills_file = "./src/polyfills/Winx.js"
+polyfills_file = "./polyfills/Winx.js"
+modules_folder = "./examples/"
 ```
 
 ### [winx] Config
