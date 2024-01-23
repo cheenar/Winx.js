@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -std=c++17 -O3 -Wall -pedantic -fsanitize=address
+CXXFLAGS = -std=c++17 -O3 -Wall -pedantic #-fsanitize=address
 INCLUDES = -I./include/toml++ -I./include/v8 -I./include/uv -I./include
 LIBS = ./lib/v8/libv8_monolith.a ./lib/libuv/libuv.a -shared-libasan
 SRCDIR = src
@@ -26,3 +26,4 @@ bundle_winx:
 clean:
 	@rm -rf $(OBJDIR) $(TARGET)
 	@rm $(SRCDIR)/embedded_winx_polyfill.h
+	@rm polyfills/Winx.js

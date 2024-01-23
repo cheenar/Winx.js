@@ -5,7 +5,7 @@ import re
 IMPORT_STATEMENT_REGEX = re.compile(r'import \"(.*?)\"')
 POLYFILL_DIRECTORY = "polyfills/"
 TEMPLATE_FILE = "Winx.js.template" 
-IS_DIFF_MODE = True
+IS_DIFF_MODE = False
 
 def read_file(filename):
   try:

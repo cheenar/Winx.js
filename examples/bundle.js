@@ -1,9 +1,11 @@
+const fs = require("node:fs");
+
 const IMPORT_STATEMENT_REGEX = /import "(?<import_file>.*?)"/g;
 const POLYFILL_DIRECTORY = "polyfills/";
 const TEMPLATE_FILE = "Winx.js.template";
 
 function read_file(filename) {
-  return Winx.fs.blind_read_file(filename);
+  return fs.readFileSync(filename, "utf8");
 }
 
 function safe_read_file(filename) {
