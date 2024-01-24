@@ -1,34 +1,13 @@
 #include "winx.hpp"
 
-void Winx::WinxEngine::InitializeEngine()
-{
-    // argv[0]
-    V8::InitializeICUDefaultLocation(nullptr);
-    V8::InitializeExternalStartupData(nullptr);
-    this->platform = platform::NewDefaultPlatform();
-    V8::InitializePlatform(this->platform.get());
-    V8::SetFlagsFromString(Winx::Config::get_v8_flags().c_str());
-    V8::Initialize();
-
-    Isolate::CreateParams create_params;
-    create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
-    Isolate *isolate = Isolate::New(create_params);
-
-    isolate->SetHostImportModuleDynamicallyCallback(Winx::Modules::ResolveDynamicModuleCallback);
-
-    this->create_params = create_params;
-    this->isolate = isolate;
-}
-
 void Winx::WinxEngine::ExecuteScript()
 {
-    Context::Scope context_scope(this->context.Get(isolate));
+    Context::Scope context_scope(this->GetContext());
     {
-        Local<External> externalWinxEngine = External::New(isolate, this);
-        Local<Context> context = this->context.Get(isolate);
-        context->Global()
-            ->Set(context, String::NewFromUtf8(isolate, "winxEngine", NewStringType::kNormal).ToLocalChecked(),
-                  externalWinxEngine)
+        auto externalWinxEngine = External::New(isolate, this);
+        this->GetContext()
+            ->Global()
+            ->Set(this->GetContext(), String::NewFromUtf8Literal(isolate, "winxEngine"), externalWinxEngine)
             .FromJust();
 
         Local<String> initial_runtime;
@@ -44,23 +23,13 @@ void Winx::WinxEngine::ExecuteScript()
                 String::NewFromUtf8(isolate, this->external_polyfill_bootstrapper.c_str(), NewStringType::kNormal)
                     .ToLocalChecked();
         }
-        Local<Script> initial_runtime_script = Script::Compile(context, initial_runtime).ToLocalChecked();
-        initial_runtime_script->Run(context).ToLocalChecked();
+        Local<Script> initial_runtime_script = Script::Compile(this->GetContext(), initial_runtime).ToLocalChecked();
+        initial_runtime_script->Run(this->GetContext()).ToLocalChecked();
 
         auto module = Winx::Modules::CheckModule(
-            context, Winx::Modules::LoadModule(context, program_file, Winx::Util::read_file(program_file).c_str()));
-        Winx::Modules::ExecuteModule(context, module);
-
-        // TODO: Do we need module-less support?
-        // Local<String> source_code =
-        //     String::NewFromUtf8(isolate, program_file.c_str(),
-        //                             NewStringType::kNormal)
-        //         .ToLocalChecked();
-        // Local<Script> script =
-        //     Script::Compile(context, source_code).ToLocalChecked();
-        // auto script_result = script->Run(context).ToLocalChecked();
-        // String::Utf8Value utf8(isolate, script_result);
-        // cout << "Result: " << *utf8 << endl;
+            this->GetContext(),
+            Winx::Modules::LoadModule(this->GetContext(), program_file, Winx::Util::read_file(program_file).c_str()));
+        Winx::Modules::ExecuteModule(this->GetContext(), module);
     }
     this->globalThis.Reset();
     this->context.Reset();
@@ -77,11 +46,12 @@ Winx::WinxEngine::WinxEngine(string program_file, string program_embedded_reques
     this->program_file = program_file;
     this->program_emebdded_request = program_embedded_request;
     this->external_polyfill_bootstrapper = external_polyfill_bootstrapper;
+    this->is_context_configured = false;
 
     this->InitializeEngine();
 }
 
-string Winx::WinxEngine::GetEmebeddedRequest()
+inline string Winx::WinxEngine::GetEmebeddedRequest()
 {
     return this->program_emebdded_request;
 }
@@ -110,11 +80,19 @@ void Winx::WinxEngine::ConfigureEngine()
 
 void Winx::WinxEngine::SetupContext()
 {
+    if (this->is_context_configured)
+        return;
     this->context = Global<Context>(isolate, Context::New(isolate, NULL, this->globalThis.Get(isolate)));
+    this->is_context_configured = true;
 }
 
 void Winx::WinxEngine::RunProgram()
 {
+    if (!is_context_configured)
+    {
+        this->SetupContext();
+    }
+
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
@@ -132,12 +110,12 @@ void Winx::WinxEngine::DisposeEngine()
 
 string Winx::GetEmbeddedPolyfillData()
 {
-    char *poly_data = (char *)malloc(sizeof(char) * (polyfills_Winx_js_len + 1));
-    for (int i = 0; i < polyfills_Winx_js_len; i++)
+    char *poly_data = (char *)malloc(sizeof(char) * (POLYFILL_FILE_LENGTH + 1));
+    for (int i = 0; i < POLYFILL_FILE_LENGTH; i++)
     {
-        poly_data[i] = polyfills_Winx_js[i];
+        poly_data[i] = POLYFILL_FILE_CONTENTS[i];
     }
-    poly_data[polyfills_Winx_js_len] = '\0';
+    poly_data[POLYFILL_FILE_LENGTH] = '\0';
     return string(poly_data);
 }
 
@@ -162,6 +140,45 @@ void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyC
     info.GetReturnValue().Set(json);
 }
 
+inline Local<ObjectTemplate> Winx::WinxEngine::GetGlobalThis()
+{
+    return this->globalThis.Get(this->isolate);
+}
+
+inline Local<Context> Winx::WinxEngine::GetContext()
+{
+    return this->context.Get(this->isolate);
+}
+
+inline Isolate *Winx::WinxEngine::GetIsolate()
+{
+    return this->isolate;
+}
+
+/**
+ * @brief Initializes the V8 Engine and creates the engine specific instance of the V8 isolate.
+ * Not intended for multi-isolate in engine-land, will need to create larger wrapper (Realm?).
+ */
+void Winx::WinxEngine::InitializeEngine()
+{
+    V8::InitializeICUDefaultLocation(nullptr); // TODO: internationalization support
+    V8::InitializeExternalStartupData(nullptr);
+    this->platform = platform::NewDefaultPlatform();
+    V8::InitializePlatform(this->platform.get());
+    V8::SetFlagsFromString(Winx::Config::get_v8_flags().c_str());
+    V8::Initialize();
+
+    Isolate::CreateParams create_params;
+    create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+    Isolate *isolate = Isolate::New(create_params);
+
+    // Configures async-await module resolution
+    isolate->SetHostImportModuleDynamicallyCallback(Winx::Modules::ResolveDynamicModuleCallback);
+
+    this->create_params = create_params;
+    this->isolate = isolate;
+}
+
 /*--------------------*/
 /* The Main Functions */
 /*--------------------*/
@@ -183,11 +200,10 @@ int internal_main(int argc, char *argv[])
     engine.ConfigureEngine();
 
     {
-        Isolate *isolate = engine.isolate;
+        Isolate *isolate = engine.GetIsolate();
         Isolate::Scope isolate_scope(isolate);
         HandleScope handle_scope(isolate);
-        engine.SetupBinding(engine.globalThis.Get(engine.isolate), Winx::Bindings::Os::EngineBind(engine.isolate),
-                            "custom_bind");
+        engine.SetupBinding(engine.GetGlobalThis(), Winx::Bindings::Os::EngineBind(engine.GetIsolate()), "custom_bind");
         engine.SetupContext();
         engine.RunProgram();
     }

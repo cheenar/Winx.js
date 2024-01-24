@@ -19,6 +19,13 @@
 #include "winx_util.hpp"
 #include <cli11/CLI11.hpp>
 
+/*
+ * The polyfill file contents are loaded here. The polyfill data embeds the runtime with
+ * JavaScript code, and enables developing the runtime outside of native code.
+ */
+#define POLYFILL_FILE_CONTENTS polyfills_Winx_js
+#define POLYFILL_FILE_LENGTH polyfills_Winx_js_len
+
 extern unsigned int polyfills_Winx_js_len;
 extern unsigned char polyfills_Winx_js[];
 
@@ -90,6 +97,18 @@ class WinxEngine
     // The V8 platform instance.
     unique_ptr<Winx::WinxPlatform> platform;
 
+    // The global binding variable for objects and functions
+    Global<ObjectTemplate> globalThis;
+
+    // The V8 context instance.
+    Global<Context> context;
+
+    // The V8 Isolate instance.
+    Isolate *isolate;
+
+    // Enabled once SetupContext() is invoked, signaling that context is ready to be augmented.
+    bool is_context_configured;
+
     /**
      * @brief Initializes the V8 engine. Sets up the ICU data and the V8 platform. Masses the
      * dynamic module resolution callback.
@@ -102,6 +121,9 @@ class WinxEngine
      */
     void ExecuteScript();
 
+  public:
+    WinxEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper);
+
     /**
      * @brief Provides a mechanism to bind a V8 object to the global scope. This is used to seed
      * the runtime with native functions.
@@ -110,25 +132,7 @@ class WinxEngine
      * @param object The object to bind.
      * @param object_name The name of the object to bind. This is what will appear in JS land under the Winx object.
      */
-
-  public:
-    WinxEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper);
-
-    // The V8 Isolate instance.
-    Isolate *isolate;
-    Global<ObjectTemplate> globalThis;
-    // The V8 context instance.
-    Global<Context> context;
-
     void SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name);
-
-    /**
-     * @brief EmbeddedRequest Getter.
-     * @return string The embedded request data.
-     */
-    string GetEmebeddedRequest();
-
-    Global<ObjectTemplate> GetGlobalThis();
 
     void SetupContext();
 
@@ -146,6 +150,20 @@ class WinxEngine
      * @brief Disposes of the engine.
      */
     void DisposeEngine();
+
+    /** Getters **/
+
+    /**
+     * @brief EmbeddedRequest Getter.
+     * @return string The embedded request data.
+     */
+    inline string GetEmebeddedRequest();
+
+    inline Isolate *GetIsolate();
+
+    inline Local<ObjectTemplate> GetGlobalThis();
+
+    inline Local<Context> GetContext();
 };
 
 }; // namespace Winx
