@@ -13,7 +13,10 @@ static bool parse_configuration(string config_file, toml::table &result)
     }
     catch (const toml::parse_error &err)
     {
-        cerr << "Attempting to parse toml configuration file " << config_file << " failed " << err << endl;
+        if (IS_DEBUG_MODE_ENABLED)
+        {
+            cerr << "Attempting to parse toml configuration file " << config_file << " failed " << err << endl;
+        }
         return false;
     }
     return true;

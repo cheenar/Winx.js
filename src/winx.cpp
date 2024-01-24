@@ -108,7 +108,8 @@ void Winx::WinxEngine::ConfigureEngine()
     this->globalThis = Global<ObjectTemplate>(isolate, global);
 }
 
-void Winx::WinxEngine::SetupContext() {
+void Winx::WinxEngine::SetupContext()
+{
     this->context = Global<Context>(isolate, Context::New(isolate, NULL, this->globalThis.Get(isolate)));
 }
 
@@ -187,6 +188,7 @@ int internal_main(int argc, char *argv[])
         HandleScope handle_scope(isolate);
         engine.SetupBinding(engine.globalThis.Get(engine.isolate), Winx::Bindings::Os::EngineBind(engine.isolate),
                             "custom_bind");
+        engine.SetupContext();
         engine.RunProgram();
     }
 

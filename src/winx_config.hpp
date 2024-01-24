@@ -3,6 +3,7 @@
 
 #include <toml.h>
 
+#include "winx_globals.hpp"
 #include "winx_util.hpp"
 #include <iostream>
 #include <string>
