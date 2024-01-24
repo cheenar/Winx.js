@@ -8,6 +8,10 @@ SRCS = $(shell find $(SRCDIR)/ -type f -name '*.cpp')
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
 TARGET = out/winx
 
+ifdef MEM_SAFETY
+	CXXFLAGS += -fsanitize=address
+endif
+
 .PHONY: clean
 
 $(TARGET): $(OBJS)
