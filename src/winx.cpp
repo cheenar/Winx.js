@@ -22,9 +22,10 @@ void Winx::WinxEngine::InitializeEngine()
 
 void Winx::WinxEngine::ExecuteScript()
 {
-    Context::Scope context_scope(this->context);
+    Context::Scope context_scope(this->context.Get(isolate));
     {
         Local<External> externalWinxEngine = External::New(isolate, this);
+        Local<Context> context = this->context.Get(isolate);
         context->Global()
             ->Set(context, String::NewFromUtf8(isolate, "winxEngine", NewStringType::kNormal).ToLocalChecked(),
                   externalWinxEngine)
@@ -61,6 +62,8 @@ void Winx::WinxEngine::ExecuteScript()
         // String::Utf8Value utf8(isolate, script_result);
         // cout << "Result: " << *utf8 << endl;
     }
+    this->globalThis.Reset();
+    this->context.Reset();
 }
 
 void Winx::WinxEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
@@ -83,7 +86,7 @@ string Winx::WinxEngine::GetEmebeddedRequest()
     return this->program_emebdded_request;
 }
 
-void Winx::WinxEngine::RunProgram()
+void Winx::WinxEngine::ConfigureEngine()
 {
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
@@ -102,13 +105,24 @@ void Winx::WinxEngine::RunProgram()
                             EmbeddedRequestGetterAccessor);
     }
 
-    Local<Context> context = Context::New(isolate, NULL, global);
-    this->context = context;
+    this->globalThis = Global<ObjectTemplate>(isolate, global);
+}
+
+void Winx::WinxEngine::SetupContext() {
+    this->context = Global<Context>(isolate, Context::New(isolate, NULL, this->globalThis.Get(isolate)));
+}
+
+void Winx::WinxEngine::RunProgram()
+{
+    Isolate *isolate = this->isolate;
+    Isolate::Scope isolate_scope(isolate);
+    HandleScope handle_scope(isolate);
     this->ExecuteScript();
 }
 
 void Winx::WinxEngine::DisposeEngine()
 {
+    this->isolate->DiscardThreadSpecificMetadata();
     this->isolate->Dispose();
     V8::Dispose();
     V8::DisposePlatform();
@@ -165,7 +179,17 @@ int internal_main(int argc, char *argv[])
     string bootstrapper = Winx::Util::read_file(Winx::Config::get_winx_flag(WINX_CONFIG_POLYFILLS));
 
     Winx::WinxEngine engine(filename, environment_embedded_request, bootstrapper);
-    engine.RunProgram();
+    engine.ConfigureEngine();
+
+    {
+        Isolate *isolate = engine.isolate;
+        Isolate::Scope isolate_scope(isolate);
+        HandleScope handle_scope(isolate);
+        engine.SetupBinding(engine.globalThis.Get(engine.isolate), Winx::Bindings::Os::EngineBind(engine.isolate),
+                            "custom_bind");
+        engine.RunProgram();
+    }
+
     engine.DisposeEngine();
     return 0;
 }

@@ -1,0 +1,1 @@
+console.log(custom_bind.get_free_memory())

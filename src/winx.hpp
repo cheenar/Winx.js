@@ -26,13 +26,16 @@ using std::string;
 using std::unique_ptr;
 using v8::Boolean;
 using v8::Context;
+using v8::CopyablePersistentTraits;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::FunctionTemplate;
+using v8::Global;
 using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::ObjectTemplate;
+using v8::Persistent;
 using v8::PropertyCallbackInfo;
 using v8::String;
 using v8::Value;
@@ -81,17 +84,11 @@ class WinxEngine
     // The external polyfill bootstrapper. This is the polyfill data that is loaded before script execution.
     string external_polyfill_bootstrapper;
 
-    // The V8 Isolate instance.
-    Isolate *isolate;
-
     // The initialize V8 isolate creation parameters.
     Isolate::CreateParams create_params;
 
     // The V8 platform instance.
     unique_ptr<Winx::WinxPlatform> platform;
-
-    // The V8 context instance.
-    Local<Context> context;
 
     /**
      * @brief Initializes the V8 engine. Sets up the ICU data and the V8 platform. Masses the
@@ -113,16 +110,27 @@ class WinxEngine
      * @param object The object to bind.
      * @param object_name The name of the object to bind. This is what will appear in JS land under the Winx object.
      */
-    void SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name);
 
   public:
     WinxEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper);
+
+    // The V8 Isolate instance.
+    Isolate *isolate;
+    Global<ObjectTemplate> globalThis;
+    // The V8 context instance.
+    Global<Context> context;
+
+    void SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name);
 
     /**
      * @brief EmbeddedRequest Getter.
      * @return string The embedded request data.
      */
     string GetEmebeddedRequest();
+
+    Global<ObjectTemplate> GetGlobalThis();
+
+    void SetupContext();
 
     /**
      * @brief Runs the engine given the inputs.
@@ -131,6 +139,8 @@ class WinxEngine
      * embed externally.
      */
     void RunProgram();
+
+    void ConfigureEngine();
 
     /**
      * @brief Disposes of the engine.
