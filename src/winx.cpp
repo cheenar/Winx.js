@@ -191,6 +191,8 @@ int internal_main(int argc, char *argv[])
     CLI::App app{"Winx - A V8-based JavaScript runtime for Macintosh."};
     app.add_flag("-D,--debug", IS_DEBUG_MODE_ENABLED, "Enable debug mode (default: false)")->default_val(false);
     app.add_option("-r,--request", environment_embedded_request, "A JSON to pass the runtime");
+    app.add_option("-c,--config", WINX_TOML_CONFIG_FILE_PATH,
+                   "Specify path to a configuration .toml file (default: ./Winx.toml)");
     app.add_option("filename", filename, "The program needed to execute")->required();
     CLI11_PARSE(app, argc, argv);
 

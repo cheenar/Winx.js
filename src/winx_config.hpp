@@ -22,7 +22,7 @@ namespace Winx::Config
  * @param config_file The configuration file name.
  * @return string The v8 flags string.
  */
-string get_v8_flags(string config_file = "Winx.toml");
+string get_v8_flags(string config_file = WINX_TOML_CONFIG_FILE_PATH);
 
 /**
  * @brief Get the winx flag object from the Winx.toml file.
@@ -31,7 +31,7 @@ string get_v8_flags(string config_file = "Winx.toml");
  * @param config_file The configuration file name.
  * @return string The winx flag.
  */
-string get_winx_flag(string flag_name, string default_value = "", string config_file = "Winx.toml");
+string get_winx_flag(string flag_name, string default_value = "", string config_file = WINX_TOML_CONFIG_FILE_PATH);
 
 } // namespace Winx::Config
 
