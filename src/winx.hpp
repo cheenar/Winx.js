@@ -26,6 +26,10 @@
 #define POLYFILL_FILE_CONTENTS polyfills_Winx_js
 #define POLYFILL_FILE_LENGTH polyfills_Winx_js_len
 
+#define WINX_EXTERN __attribute__((visibility("default")))
+#define WINX_EXTERN_HIDDEN __attribute__((visibility("hidden")))
+#define WINX_EXTERN_PROTECTED __attribute__((visibility("protected")))
+
 extern unsigned int polyfills_Winx_js_len;
 extern unsigned char polyfills_Winx_js[];
 
@@ -58,7 +62,7 @@ namespace Winx
  *
  * @return string Safe polyfill data string
  */
-string GetEmbeddedPolyfillData();
+WINX_EXTERN_HIDDEN string GetEmbeddedPolyfillData();
 
 /**
  * @brief Produces a getter method for retrieving the embedded request data. Upon Engine startup,
@@ -73,13 +77,13 @@ string GetEmbeddedPolyfillData();
  * @param property The property being retrieved.
  * @param info Property callback information to retrieve the engine instance and return the data.
  */
-void EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info);
+WINX_EXTERN_HIDDEN void EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info);
 
 /**
  * @brief NaiveEngine is the main class for the Winx runtime. It is responsible for creation and
  * management of the V8 runtime.
  */
-class NaiveEngine
+class WINX_EXTERN NaiveEngine
 {
   private:
     // The program file name to be executed.
