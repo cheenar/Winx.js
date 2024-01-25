@@ -12,6 +12,10 @@ ifdef MEM_SAFETY
 	CXXFLAGS += -fsanitize=address
 endif
 
+ifdef DEBUG
+	CXXFLAGS += -g
+endif
+
 .PHONY: clean
 
 $(TARGET): $(OBJS)

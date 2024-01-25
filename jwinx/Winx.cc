@@ -50,8 +50,8 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
     IS_DEBUG_MODE_ENABLED = false;
 
     string bootstrapper = Winx::Util::read_file(Winx::Config::get_winx_flag(WINX_CONFIG_POLYFILLS));
-    Winx::WinxEngine engine((char *)(*env).GetStringUTFChars(str, 0), "", bootstrapper);
-    engine.ConfigureEngine();
+    Winx::NaiveEngine engine((char *)(*env).GetStringUTFChars(str, 0), "", bootstrapper);
+    engine.InitializeStandardWinxRuntimeBindings();
 
     {
         Isolate *isolate = engine.isolate;
@@ -59,7 +59,7 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
         HandleScope handle_scope(isolate);
         engine.SetupBinding(engine.globalThis.Get(engine.isolate), EngineBind(engine.isolate), "jni");
 
-        engine.SetupContext();
+        engine.InitializeContextWithGlobalObject();
         Local<Context> context = Local<Context>::New(engine.isolate, engine.context);
         context->Global()
             ->Set(context, String::NewFromUtf8(isolate, "JNI_ENV", NewStringType::kNormal).ToLocalChecked(),
@@ -78,8 +78,8 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
         HandleScope handle_scope(isolate);
         Local<Context> context = engine.context.Get(engine.isolate);
         Context::Scope context_scope(context);
-        engine.RunProgram();
+        engine.ExecuteEmbeddedProgram();
     }
 
-    engine.DisposeEngine();
+    engine.ShutdownEngine();
 }

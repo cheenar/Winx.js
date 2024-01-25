@@ -76,10 +76,10 @@ string GetEmbeddedPolyfillData();
 void EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info);
 
 /**
- * @brief WinxEngine is the main class for the Winx runtime. It is responsible for creation and
+ * @brief NaiveEngine is the main class for the Winx runtime. It is responsible for creation and
  * management of the V8 runtime.
  */
-class WinxEngine
+class NaiveEngine
 {
   private:
     // The program file name to be executed.
@@ -106,26 +106,36 @@ class WinxEngine
     // The V8 Isolate instance.
     Isolate *isolate;
 
-    // Enabled once SetupContext() is invoked, signaling that context is ready to be augmented.
+    // Enabled once InitializeContextWithGlobalObject() is invoked, signaling that context is ready to be augmented.
+    // Used for adding data to global context.
     bool is_context_configured;
 
     /**
      * @brief Initializes the V8 engine. Sets up the ICU data and the V8 platform. Masses the
      * dynamic module resolution callback.
      */
-    void InitializeEngine();
+    void InternalInitializeEngine();
 
     /**
      * @brief Executes the script file provided in the ctr. Creates a scope context, executes the polyfill
      * source, and then executes the program file in module mode.
      */
-    void ExecuteScript();
+    void InternalExecuteJavascript();
 
   public:
-    WinxEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper);
+    /**
+     * @brief Construct a new Winx Engine object.
+     *
+     * TODO: Migrate program_embedded_request to a setup method that can be done in the main() if desired.
+     *
+     * @param program_file The program file path, will be read locally by the engine.
+     * @param program_embedded_request A stringified JSON object to be embedded in the runtime
+     * @param external_polyfill_bootstrapper External polyfill script to seed runtime
+     */
+    NaiveEngine(string program_file, string program_embedded_request, string external_polyfill_bootstrapper);
 
     /**
-     * @brief Provides a mechanism to bind a V8 object to the global scope. This is used to seed
+     * @brief Provides a mechanism to bind a V8 object template to the global scope. This is used to seed
      * the runtime with native functions.
      *
      * @param parent The globalThis parameter.
@@ -134,7 +144,18 @@ class WinxEngine
      */
     void SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name);
 
-    void SetupContext();
+    /**
+     * @brief Initializes the NaiveEngine with standard bindings. Also configures the GlobalThis() for embedding
+     * further into the engine.
+     *
+     */
+    void InitializeStandardWinxRuntimeBindings();
+
+    /**
+     * @brief Triggers creation of the context. By default, if the context is not created, it will be upon
+     * ExecuteEmbeddedProgram()
+     */
+    void InitializeContextWithGlobalObject();
 
     /**
      * @brief Runs the engine given the inputs.
@@ -142,14 +163,12 @@ class WinxEngine
      * TODO: Support loading the runtime with functionality via the public methods; enables the ability to
      * embed externally.
      */
-    void RunProgram();
-
-    void ConfigureEngine();
+    void ExecuteEmbeddedProgram();
 
     /**
      * @brief Disposes of the engine.
      */
-    void DisposeEngine();
+    void ShutdownEngine();
 
     /** Getters **/
 

@@ -1,6 +1,6 @@
 #include "winx.hpp"
 
-void Winx::WinxEngine::ExecuteScript()
+void Winx::NaiveEngine::InternalExecuteJavascript()
 {
     Context::Scope context_scope(this->GetContext());
     {
@@ -35,28 +35,28 @@ void Winx::WinxEngine::ExecuteScript()
     this->context.Reset();
 }
 
-void Winx::WinxEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
+void Winx::NaiveEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
 {
     parent->Set(isolate, object_name.c_str(), object);
 }
 
-Winx::WinxEngine::WinxEngine(string program_file, string program_embedded_request,
-                             string external_polyfill_bootstrapper)
+Winx::NaiveEngine::NaiveEngine(string program_file, string program_embedded_request,
+                               string external_polyfill_bootstrapper)
 {
     this->program_file = program_file;
     this->program_emebdded_request = program_embedded_request;
     this->external_polyfill_bootstrapper = external_polyfill_bootstrapper;
     this->is_context_configured = false;
 
-    this->InitializeEngine();
+    this->InternalInitializeEngine();
 }
 
-inline string Winx::WinxEngine::GetEmebeddedRequest()
+inline string Winx::NaiveEngine::GetEmebeddedRequest()
 {
     return this->program_emebdded_request;
 }
 
-void Winx::WinxEngine::ConfigureEngine()
+void Winx::NaiveEngine::InitializeStandardWinxRuntimeBindings()
 {
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
@@ -78,7 +78,7 @@ void Winx::WinxEngine::ConfigureEngine()
     this->globalThis = Global<ObjectTemplate>(isolate, global);
 }
 
-void Winx::WinxEngine::SetupContext()
+void Winx::NaiveEngine::InitializeContextWithGlobalObject()
 {
     if (this->is_context_configured)
         return;
@@ -86,20 +86,20 @@ void Winx::WinxEngine::SetupContext()
     this->is_context_configured = true;
 }
 
-void Winx::WinxEngine::RunProgram()
+void Winx::NaiveEngine::ExecuteEmbeddedProgram()
 {
     if (!is_context_configured)
     {
-        this->SetupContext();
+        this->InitializeContextWithGlobalObject();
     }
 
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
-    this->ExecuteScript();
+    this->InternalExecuteJavascript();
 }
 
-void Winx::WinxEngine::DisposeEngine()
+void Winx::NaiveEngine::ShutdownEngine()
 {
     this->isolate->DiscardThreadSpecificMetadata();
     this->isolate->Dispose();
@@ -127,7 +127,7 @@ void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyC
                   String::NewFromUtf8(info.GetIsolate(), "winxEngine", NewStringType::kNormal).ToLocalChecked())
             .ToLocalChecked()
             .As<External>();
-    WinxEngine *winxEngine = static_cast<WinxEngine *>(externalWinxEngine->Value());
+    NaiveEngine *winxEngine = static_cast<NaiveEngine *>(externalWinxEngine->Value());
 
     Isolate *isolate = info.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
@@ -140,17 +140,17 @@ void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyC
     info.GetReturnValue().Set(json);
 }
 
-inline Local<ObjectTemplate> Winx::WinxEngine::GetGlobalThis()
+inline Local<ObjectTemplate> Winx::NaiveEngine::GetGlobalThis()
 {
     return this->globalThis.Get(this->isolate);
 }
 
-inline Local<Context> Winx::WinxEngine::GetContext()
+inline Local<Context> Winx::NaiveEngine::GetContext()
 {
     return this->context.Get(this->isolate);
 }
 
-inline Isolate *Winx::WinxEngine::GetIsolate()
+inline Isolate *Winx::NaiveEngine::GetIsolate()
 {
     return this->isolate;
 }
@@ -159,7 +159,7 @@ inline Isolate *Winx::WinxEngine::GetIsolate()
  * @brief Initializes the V8 Engine and creates the engine specific instance of the V8 isolate.
  * Not intended for multi-isolate in engine-land, will need to create larger wrapper (Realm?).
  */
-void Winx::WinxEngine::InitializeEngine()
+void Winx::NaiveEngine::InternalInitializeEngine()
 {
     V8::InitializeICUDefaultLocation(nullptr); // TODO: internationalization support
     V8::InitializeExternalStartupData(nullptr);
@@ -196,19 +196,19 @@ int internal_main(int argc, char *argv[])
 
     string bootstrapper = Winx::Util::read_file(Winx::Config::get_winx_flag(WINX_CONFIG_POLYFILLS));
 
-    Winx::WinxEngine engine(filename, environment_embedded_request, bootstrapper);
-    engine.ConfigureEngine();
+    Winx::NaiveEngine engine(filename, environment_embedded_request, bootstrapper);
+    engine.InitializeStandardWinxRuntimeBindings();
 
     {
         Isolate *isolate = engine.GetIsolate();
         Isolate::Scope isolate_scope(isolate);
         HandleScope handle_scope(isolate);
         engine.SetupBinding(engine.GetGlobalThis(), Winx::Bindings::Os::EngineBind(engine.GetIsolate()), "custom_bind");
-        engine.SetupContext();
-        engine.RunProgram();
+        engine.InitializeContextWithGlobalObject();
+        engine.ExecuteEmbeddedProgram();
     }
 
-    engine.DisposeEngine();
+    engine.ShutdownEngine();
     return 0;
 }
 
