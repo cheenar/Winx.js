@@ -54,13 +54,13 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
     engine.InitializeStandardWinxRuntimeBindings();
 
     {
-        Isolate *isolate = engine.isolate;
+        Isolate *isolate = engine.GetIsolate();
         Isolate::Scope isolate_scope(isolate);
         HandleScope handle_scope(isolate);
-        engine.SetupBinding(engine.globalThis.Get(engine.isolate), EngineBind(engine.isolate), "jni");
+        engine.SetupBinding(engine.GetGlobalThis(), EngineBind(engine.GetIsolate()), "jni");
 
         engine.InitializeContextWithGlobalObject();
-        Local<Context> context = Local<Context>::New(engine.isolate, engine.context);
+        Local<Context> context = Local<Context>::New(engine.GetIsolate(), engine.GetContext());
         context->Global()
             ->Set(context, String::NewFromUtf8(isolate, "JNI_ENV", NewStringType::kNormal).ToLocalChecked(),
                   v8::External::New(isolate, env))
@@ -73,10 +73,10 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
     }
 
     {
-        Isolate *isolate = engine.isolate;
+        Isolate *isolate = engine.GetIsolate();
         Isolate::Scope isolate_scope(isolate);
         HandleScope handle_scope(isolate);
-        Local<Context> context = engine.context.Get(engine.isolate);
+        Local<Context> context = engine.GetContext();
         Context::Scope context_scope(context);
         engine.ExecuteEmbeddedProgram();
     }
