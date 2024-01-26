@@ -1,6 +1,10 @@
 // Console
-console.log = Winx.console.log;
-console.debug = Winx.console.debug;
+console.log = function (str = "", newline_char = "\n") {
+  Winx.console.log(str, newline_char);
+}
+console.debug = function (str = "", newline_char = "\n") {
+  Winx.console.debug(str, newline_char);
+}
 
 const formatted = (number, sig_digits = 2) => {
   let factor = Math.pow(10, sig_digits);

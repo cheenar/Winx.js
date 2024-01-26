@@ -42,10 +42,9 @@ void Winx::NaiveEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectT
 
 Winx::NaiveEngine::NaiveEngine(string program_file, string program_embedded_request,
                                string external_polyfill_bootstrapper)
+    : program_file(program_file), program_embedded_request(program_embedded_request),
+      external_polyfill_bootstrapper(external_polyfill_bootstrapper), is_context_configured(false)
 {
-    this->program_file = program_file;
-    this->program_emebdded_request = program_embedded_request;
-    this->external_polyfill_bootstrapper = external_polyfill_bootstrapper;
     this->is_context_configured = false;
 
     this->InternalInitializeEngine();
@@ -53,7 +52,7 @@ Winx::NaiveEngine::NaiveEngine(string program_file, string program_embedded_requ
 
 inline string Winx::NaiveEngine::GetEmebeddedRequest()
 {
-    return this->program_emebdded_request;
+    return this->program_embedded_request;
 }
 
 void Winx::NaiveEngine::InitializeStandardWinxRuntimeBindings()
@@ -69,7 +68,7 @@ void Winx::NaiveEngine::InitializeStandardWinxRuntimeBindings()
     SetupBinding(winx, Winx::Bindings::Os::EngineBind(isolate), "os");
     SetupBinding(global, winx, "Winx");
 
-    if (!this->program_emebdded_request.empty())
+    if (!this->program_embedded_request.empty())
     {
         global->SetAccessor(String::NewFromUtf8(isolate, "request", NewStringType::kNormal).ToLocalChecked(),
                             EmbeddedRequestGetterAccessor);

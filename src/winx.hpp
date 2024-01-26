@@ -87,13 +87,13 @@ class WINX_EXTERN NaiveEngine
 {
   private:
     // The program file name to be executed.
-    string program_file;
+    const string program_file;
 
     // The embedded request data.
-    string program_emebdded_request;
+    const string program_embedded_request;
 
     // The external polyfill bootstrapper. This is the polyfill data that is loaded before script execution.
-    string external_polyfill_bootstrapper;
+    const string external_polyfill_bootstrapper;
 
     // The initialize V8 isolate creation parameters.
     Isolate::CreateParams create_params;
