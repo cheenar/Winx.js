@@ -24,5 +24,11 @@
 #define CHECK_LE(a, b) CHECK((a) <= (b))
 #define CHECK_GT(a, b) CHECK((a) > (b))
 #define CHECK_GE(a, b) CHECK((a) >= (b))
+#define CHECK_NOT_NULL(expr) CHECK((expr) != nullptr)
+
+#define GEN_STRING_ONE_BYTE(isolate, str)                                                                              \
+    v8::String::NewFromOneByte(isolate, str, v8::NewStringType::kNormal).ToLocalChecked()
+
+#define GEN_STRING_UTF8(isolate, str) v8::String::NewFromUtf8(isolate, str, v8::NewStringType::kNormal).ToLocalChecked()
 
 #endif // __SRC_UTIL_HPP__
