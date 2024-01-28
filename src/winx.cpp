@@ -27,8 +27,6 @@ void Winx::NaiveEngine::InternalExecuteJavascript()
             Winx::Modules::LoadModule(this->GetContext(), program_file, Winx::Util::read_file(program_file).c_str()));
         Winx::Modules::ExecuteModule(this->GetContext(), module);
     }
-    this->globalThis.Reset();
-    this->context.Reset();
 }
 
 void Winx::NaiveEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
@@ -96,6 +94,8 @@ void Winx::NaiveEngine::ExecuteEmbeddedProgram()
 
 void Winx::NaiveEngine::ShutdownEngine()
 {
+    this->globalThis.Reset();
+    this->context.Reset();
     this->isolate->DiscardThreadSpecificMetadata();
     this->isolate->Dispose();
     V8::Dispose();
@@ -111,7 +111,9 @@ string Winx::GetEmbeddedPolyfillData()
         poly_data[i] = POLYFILL_FILE_CONTENTS[i];
     }
     poly_data[POLYFILL_FILE_LENGTH] = '\0';
-    return string(poly_data);
+    auto result = string(poly_data);
+    delete poly_data;
+    return result;
 }
 
 void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info)
