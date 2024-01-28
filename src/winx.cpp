@@ -155,8 +155,9 @@ inline Isolate *Winx::NaiveEngine::GetIsolate()
 }
 
 /**
- * @brief Initializes the V8 Engine and creates the engine specific instance of the V8 isolate.
- * Not intended for multi-isolate in engine-land, will need to create larger wrapper (Realm?).
+ * @brief Initializes the V8 Engine and creates the engine specific instance of
+ * the V8 isolate. Not intended for multi-isolate in engine-land, will need to
+ * create larger wrapper (Realm?).
  */
 void Winx::NaiveEngine::InternalInitializeEngine()
 {
