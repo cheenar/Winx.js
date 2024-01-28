@@ -1,5 +1,5 @@
-#ifndef WINX_OS_HPP
-#define WINX_OS_HPP
+#ifndef __SRC_WINX_OS_HPP__
+#define __SRC_WINX_OS_HPP__
 
 #include "winx_binding.hpp"
 #include <iostream>
@@ -61,4 +61,4 @@ v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate)
 
 } // namespace Winx::Bindings::Os
 
-#endif // WINX_OS_HPP
+#endif // __SRC_WINX_OS_HPP__

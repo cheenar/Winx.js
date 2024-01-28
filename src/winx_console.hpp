@@ -7,6 +7,7 @@
 #include <string>
 #include <termcolor/termcolor.hpp>
 
+#include "util.hpp"
 #include "winx_binding.hpp"
 #include "winx_globals.hpp"
 
@@ -45,25 +46,19 @@ v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate);
 
 } // namespace Winx::Bindings::Console
 
-static void formatted_print(const v8::FunctionCallbackInfo<v8::Value> &args, std::string prefix)
+WINX_EXTERN_HIDDEN static void formatted_print(const v8::FunctionCallbackInfo<v8::Value> &args, std::string prefix)
 {
+    CHECK_EQ(args.Length(), 2);
     v8::Isolate *isolate = args.GetIsolate();
-    if (args.Length() < 1)
-    {
-        return;
-    }
     v8::String::Utf8Value message(isolate, args[0]);
-
-    if (prefix.empty() || !IS_DEBUG_MODE_ENABLED)
-    {
-        std::cout << *message << std::endl;
-    }
-    else
-    {
-        std::cout << "[" << termcolor::magenta << termcolor::bold << prefix << termcolor::reset << "] " << *message
-                  << std::endl;
-    }
+    if (!prefix.empty() && IS_DEBUG_MODE_ENABLED)
+        std::cout << "[" << termcolor::magenta << termcolor::bold << prefix << termcolor::reset << "] ";
+    std::cout << *message;
+    v8::String::Utf8Value newline(isolate, args[1]);
+    std::cout << *newline;
 }
+
+// TODO: Supoport variadic arguments console.log
 
 void Winx::Bindings::Console::log(const v8::FunctionCallbackInfo<v8::Value> &args)
 {

@@ -23,11 +23,11 @@ g++ -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin Winx.cc -std=c
 **Create dynamic library**
 
 ```
-g++ -dynamiclib -o libwinx.dylib Winx.o  ../obj//winx_config.o  ../obj//winx_console.o  ../obj//winx_util.o ./../lib/v8/libv8_monolith.a ../lib/libuv/libuv.a -lc
+g++ -dynamiclib -o libwinx.dylib Winx.o  ../obj/winx_config.o  ../obj/winx_modules.o ../obj/winx_globals.o  ../obj/winx_util.o ./../lib/v8/libv8_monolith.a ../lib/libuv/libuv.a -shared-libasan -lc
 ```
 
 **Run the java**
 
 ```
-java -cp . -Djava.library.path=. Winx ../examples/say_hello.js
+java -cp jwinx -Djava.library.path=jwinx/ Winx examples/bundle.js
 ```

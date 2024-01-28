@@ -1,34 +1,10 @@
 #include "winx.hpp"
 
-void Winx::WinxEngine::InitializeEngine()
+void Winx::NaiveEngine::InternalExecuteJavascript()
 {
-    // argv[0]
-    V8::InitializeICUDefaultLocation(nullptr);
-    V8::InitializeExternalStartupData(nullptr);
-    this->platform = platform::NewDefaultPlatform();
-    V8::InitializePlatform(this->platform.get());
-    V8::SetFlagsFromString(Winx::Config::get_v8_flags().c_str());
-    V8::Initialize();
-
-    Isolate::CreateParams create_params;
-    create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
-    Isolate *isolate = Isolate::New(create_params);
-
-    isolate->SetHostImportModuleDynamicallyCallback(Winx::Modules::ResolveDynamicModuleCallback);
-
-    this->create_params = create_params;
-    this->isolate = isolate;
-}
-
-void Winx::WinxEngine::ExecuteScript()
-{
-    Context::Scope context_scope(this->context);
+    Context::Scope context_scope(this->GetContext());
     {
-        Local<External> externalWinxEngine = External::New(isolate, this);
-        context->Global()
-            ->Set(context, String::NewFromUtf8(isolate, "winxEngine", NewStringType::kNormal).ToLocalChecked(),
-                  externalWinxEngine)
-            .FromJust();
+        CONTEXT_GLOBAL_STORE(isolate, this->GetContext(), this, "winxEngine");
 
         Local<String> initial_runtime;
         // TODO: Still really hacky :D
@@ -43,47 +19,39 @@ void Winx::WinxEngine::ExecuteScript()
                 String::NewFromUtf8(isolate, this->external_polyfill_bootstrapper.c_str(), NewStringType::kNormal)
                     .ToLocalChecked();
         }
-        Local<Script> initial_runtime_script = Script::Compile(context, initial_runtime).ToLocalChecked();
-        initial_runtime_script->Run(context).ToLocalChecked();
+        Local<Script> initial_runtime_script = Script::Compile(this->GetContext(), initial_runtime).ToLocalChecked();
+        initial_runtime_script->Run(this->GetContext()).ToLocalChecked();
 
         auto module = Winx::Modules::CheckModule(
-            context, Winx::Modules::LoadModule(context, program_file, Winx::Util::read_file(program_file).c_str()));
-        Winx::Modules::ExecuteModule(context, module);
-
-        // TODO: Do we need module-less support?
-        // Local<String> source_code =
-        //     String::NewFromUtf8(isolate, program_file.c_str(),
-        //                             NewStringType::kNormal)
-        //         .ToLocalChecked();
-        // Local<Script> script =
-        //     Script::Compile(context, source_code).ToLocalChecked();
-        // auto script_result = script->Run(context).ToLocalChecked();
-        // String::Utf8Value utf8(isolate, script_result);
-        // cout << "Result: " << *utf8 << endl;
+            this->GetContext(),
+            Winx::Modules::LoadModule(this->GetContext(), program_file, Winx::Util::read_file(program_file).c_str()));
+        Winx::Modules::ExecuteModule(this->GetContext(), module);
     }
+    this->globalThis.Reset();
+    this->context.Reset();
 }
 
-void Winx::WinxEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
+void Winx::NaiveEngine::SetupBinding(Local<ObjectTemplate> parent, Local<ObjectTemplate> object, string object_name)
 {
     parent->Set(isolate, object_name.c_str(), object);
 }
 
-Winx::WinxEngine::WinxEngine(string program_file, string program_embedded_request,
-                             string external_polyfill_bootstrapper)
+Winx::NaiveEngine::NaiveEngine(string program_file, string program_embedded_request,
+                               string external_polyfill_bootstrapper)
+    : program_file(program_file), program_embedded_request(program_embedded_request),
+      external_polyfill_bootstrapper(external_polyfill_bootstrapper), is_context_configured(false)
 {
-    this->program_file = program_file;
-    this->program_emebdded_request = program_embedded_request;
-    this->external_polyfill_bootstrapper = external_polyfill_bootstrapper;
+    this->is_context_configured = false;
 
-    this->InitializeEngine();
+    this->InternalInitializeEngine();
 }
 
-string Winx::WinxEngine::GetEmebeddedRequest()
+inline string Winx::NaiveEngine::GetEmebeddedRequest()
 {
-    return this->program_emebdded_request;
+    return this->program_embedded_request;
 }
 
-void Winx::WinxEngine::RunProgram()
+void Winx::NaiveEngine::InitializeStandardWinxRuntimeBindings()
 {
     Isolate *isolate = this->isolate;
     Isolate::Scope isolate_scope(isolate);
@@ -96,19 +64,39 @@ void Winx::WinxEngine::RunProgram()
     SetupBinding(winx, Winx::Bindings::Os::EngineBind(isolate), "os");
     SetupBinding(global, winx, "Winx");
 
-    if (!this->program_emebdded_request.empty())
+    if (!this->program_embedded_request.empty())
     {
         global->SetAccessor(String::NewFromUtf8(isolate, "request", NewStringType::kNormal).ToLocalChecked(),
                             EmbeddedRequestGetterAccessor);
     }
 
-    Local<Context> context = Context::New(isolate, NULL, global);
-    this->context = context;
-    this->ExecuteScript();
+    this->globalThis = Global<ObjectTemplate>(isolate, global);
 }
 
-void Winx::WinxEngine::DisposeEngine()
+void Winx::NaiveEngine::InitializeContextWithGlobalObject()
 {
+    if (this->is_context_configured)
+        return;
+    this->context = Global<Context>(isolate, Context::New(isolate, NULL, this->globalThis.Get(isolate)));
+    this->is_context_configured = true;
+}
+
+void Winx::NaiveEngine::ExecuteEmbeddedProgram()
+{
+    if (!is_context_configured)
+    {
+        this->InitializeContextWithGlobalObject();
+    }
+
+    Isolate *isolate = this->isolate;
+    Isolate::Scope isolate_scope(isolate);
+    HandleScope handle_scope(isolate);
+    this->InternalExecuteJavascript();
+}
+
+void Winx::NaiveEngine::ShutdownEngine()
+{
+    this->isolate->DiscardThreadSpecificMetadata();
     this->isolate->Dispose();
     V8::Dispose();
     V8::DisposePlatform();
@@ -117,24 +105,18 @@ void Winx::WinxEngine::DisposeEngine()
 
 string Winx::GetEmbeddedPolyfillData()
 {
-    char *poly_data = (char *)malloc(sizeof(char) * (polyfills_Winx_js_len + 1));
-    for (int i = 0; i < polyfills_Winx_js_len; i++)
+    char *poly_data = (char *)malloc(sizeof(char) * (POLYFILL_FILE_LENGTH + 1));
+    for (int i = 0; i < POLYFILL_FILE_LENGTH; i++)
     {
-        poly_data[i] = polyfills_Winx_js[i];
+        poly_data[i] = POLYFILL_FILE_CONTENTS[i];
     }
-    poly_data[polyfills_Winx_js_len] = '\0';
+    poly_data[POLYFILL_FILE_LENGTH] = '\0';
     return string(poly_data);
 }
 
 void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info)
 {
-    Local<External> externalWinxEngine =
-        info.This()
-            ->Get(info.GetIsolate()->GetCurrentContext(),
-                  String::NewFromUtf8(info.GetIsolate(), "winxEngine", NewStringType::kNormal).ToLocalChecked())
-            .ToLocalChecked()
-            .As<External>();
-    WinxEngine *winxEngine = static_cast<WinxEngine *>(externalWinxEngine->Value());
+    NaiveEngine *winxEngine = CONTEXT_GLOBAL_STORE_RETRIEVE(info.GetIsolate(), NaiveEngine *, "winxEngine");
 
     Isolate *isolate = info.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
@@ -145,6 +127,46 @@ void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyC
     Local<Value> json = JSON::Parse(context, request).ToLocalChecked();
 
     info.GetReturnValue().Set(json);
+}
+
+inline Local<ObjectTemplate> Winx::NaiveEngine::GetGlobalThis()
+{
+    return this->globalThis.Get(this->isolate);
+}
+
+inline Local<Context> Winx::NaiveEngine::GetContext()
+{
+    return this->context.Get(this->isolate);
+}
+
+inline Isolate *Winx::NaiveEngine::GetIsolate()
+{
+    return this->isolate;
+}
+
+/**
+ * @brief Initializes the V8 Engine and creates the engine specific instance of
+ * the V8 isolate. Not intended for multi-isolate in engine-land, will need to
+ * create larger wrapper (Realm?).
+ */
+void Winx::NaiveEngine::InternalInitializeEngine()
+{
+    V8::InitializeICUDefaultLocation(nullptr); // TODO: internationalization support
+    V8::InitializeExternalStartupData(nullptr);
+    this->platform = platform::NewDefaultPlatform();
+    V8::InitializePlatform(this->platform.get());
+    V8::SetFlagsFromString(Winx::Config::get_v8_flags().c_str());
+    V8::Initialize();
+
+    Isolate::CreateParams create_params;
+    create_params.array_buffer_allocator = ArrayBuffer::Allocator::NewDefaultAllocator();
+    Isolate *isolate = Isolate::New(create_params);
+
+    // Configures async-await module resolution
+    isolate->SetHostImportModuleDynamicallyCallback(Winx::Modules::ResolveDynamicModuleCallback);
+
+    this->create_params = create_params;
+    this->isolate = isolate;
 }
 
 /*--------------------*/
@@ -159,14 +181,25 @@ int internal_main(int argc, char *argv[])
     CLI::App app{"Winx - A V8-based JavaScript runtime for Macintosh."};
     app.add_flag("-D,--debug", IS_DEBUG_MODE_ENABLED, "Enable debug mode (default: false)")->default_val(false);
     app.add_option("-r,--request", environment_embedded_request, "A JSON to pass the runtime");
+    app.add_option("-c,--config", WINX_TOML_CONFIG_FILE_PATH,
+                   "Specify path to a configuration .toml file (default: ./Winx.toml)");
     app.add_option("filename", filename, "The program needed to execute")->required();
     CLI11_PARSE(app, argc, argv);
 
     string bootstrapper = Winx::Util::read_file(Winx::Config::get_winx_flag(WINX_CONFIG_POLYFILLS));
 
-    Winx::WinxEngine engine(filename, environment_embedded_request, bootstrapper);
-    engine.RunProgram();
-    engine.DisposeEngine();
+    Winx::NaiveEngine engine(filename, environment_embedded_request, bootstrapper);
+    engine.InitializeStandardWinxRuntimeBindings();
+
+    {
+        Isolate *isolate = engine.GetIsolate();
+        Isolate::Scope isolate_scope(isolate);
+        HandleScope handle_scope(isolate);
+        engine.InitializeContextWithGlobalObject();
+        engine.ExecuteEmbeddedProgram();
+    }
+
+    engine.ShutdownEngine();
     return 0;
 }
 

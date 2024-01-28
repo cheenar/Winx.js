@@ -1,11 +1,8 @@
-#ifndef __SRC_WINX_CONFIG_HPP__
-#define __SRC_WINX_CONFIG_HPP__
-
 #include "winx_config.hpp"
 
 #define STANDARD_V8_FLAGS ""
 
-static bool parse_configuration(string config_file, toml::table &result)
+WINX_EXTERN_HIDDEN static bool parse_configuration(string config_file, toml::table &result)
 {
     try
     {
@@ -13,13 +10,16 @@ static bool parse_configuration(string config_file, toml::table &result)
     }
     catch (const toml::parse_error &err)
     {
-        cerr << "Attempting to parse toml configuration file " << config_file << " failed " << err << endl;
+        if (IS_DEBUG_MODE_ENABLED)
+        {
+            cerr << "Attempting to parse toml configuration file " << config_file << " failed " << err << endl;
+        }
         return false;
     }
     return true;
 }
 
-string Winx::Config::get_v8_flags(string config_file)
+WINX_EXTERN_HIDDEN string Winx::Config::get_v8_flags(string config_file)
 {
     toml::table tbl;
     if (!parse_configuration(config_file, tbl))
@@ -56,7 +56,7 @@ string Winx::Config::get_v8_flags(string config_file)
     return flag_str;
 }
 
-string Winx::Config::get_winx_flag(string flag_name, string default_value, string config_file)
+WINX_EXTERN_HIDDEN string Winx::Config::get_winx_flag(string flag_name, string default_value, string config_file)
 {
     toml::table tbl;
     if (!parse_configuration(config_file, tbl))
@@ -71,5 +71,3 @@ string Winx::Config::get_winx_flag(string flag_name, string default_value, strin
     }
     return config_value;
 }
-
-#endif // __SRC_WINX_CONFIG_HPP__

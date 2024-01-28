@@ -4,6 +4,11 @@ public class Winx {
   static {
     System.loadLibrary("winx");
   }
+
+  public void helloJava() {
+    System.out.println("Hello from java");
+  }
+
   public static void main(final String[] args) {
     Winx winx = new Winx();
     winx.startupV8(args[0]);

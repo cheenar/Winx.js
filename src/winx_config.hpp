@@ -1,8 +1,10 @@
-#ifndef __WINX_CONFIG_HPP__
-#define __WINX_CONFIG_HPP__
+#ifndef __SRC_WINX_CONFIG_HPP__
+#define __SRC_WINX_CONFIG_HPP__
 
 #include <toml.h>
 
+#include "util.hpp"
+#include "winx_globals.hpp"
 #include "winx_util.hpp"
 #include <iostream>
 #include <string>
@@ -21,7 +23,7 @@ namespace Winx::Config
  * @param config_file The configuration file name.
  * @return string The v8 flags string.
  */
-string get_v8_flags(string config_file = "Winx.toml");
+string get_v8_flags(string config_file = WINX_TOML_CONFIG_FILE_PATH);
 
 /**
  * @brief Get the winx flag object from the Winx.toml file.
@@ -30,8 +32,8 @@ string get_v8_flags(string config_file = "Winx.toml");
  * @param config_file The configuration file name.
  * @return string The winx flag.
  */
-string get_winx_flag(string flag_name, string default_value = "", string config_file = "Winx.toml");
+string get_winx_flag(string flag_name, string default_value = "", string config_file = WINX_TOML_CONFIG_FILE_PATH);
 
 } // namespace Winx::Config
 
-#endif // __WINX_CONFIG_HPP__
+#endif // __SRC_WINX_CONFIG_HPP__
