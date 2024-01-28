@@ -33,6 +33,9 @@ static void get_cpu_info(const v8::FunctionCallbackInfo<v8::Value> &args)
     uv_cpu_info(&cpu_info, &num_cpus);
     v8::Local<v8::Array> cpu_info_array = v8::Array::New(isolate, num_cpus);
 
+    // TODO: Refactor this to be less verbose
+    // https://github.com/nodejs/node/blob/64c6d97463c29bade4d6081683dab2cd7cda298d/src/node_os.cc#L111
+    // Node directly sends a vector and parses in JS-land rather than doing this Object::Set nonsense
     for (int i = 0; i < num_cpus; i++)
     {
         v8::Local<v8::Object> cpu_info_object = v8::Object::New(isolate);
@@ -103,6 +106,10 @@ v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate)
     Winx::Binding::create_winx_function_binding(isolate, os, "get_total_memory", get_total_memory);
     Winx::Binding::create_winx_function_binding(isolate, os, "stdin", prompt);
     Winx::Binding::create_winx_function_binding(isolate, os, "cpus", get_cpu_info);
+
+    // TODO: Remove this and implement in JS-land; demoing adding attributes instead of functions
+    // Also remember that windows has different EOL \r\n
+    os->Set(isolate, "EOL", GEN_STRING_UTF8(isolate, "\n"), PropertyAttribute::ReadOnly);
     return os;
 }
 

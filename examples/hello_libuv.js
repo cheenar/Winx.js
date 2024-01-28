@@ -28,3 +28,8 @@ let totalMemory = formatted(os.totalmem() * (1 / 1024) * (1 / 1024) * (1 / 1024)
 emit("FreeMem", `${freeMemory} ${colorize.green().compile("GiB")}`)
 emit("TotalMem", `${totalMemory} ${colorize.green().compile("GiB")}`)
 emit("Ratio", `${formatted(freeMemory / totalMemory) * 100}${colorize.green().compile("%")}`)
+
+console.log("")
+console.log("--- Misc ---")
+
+emit("EOL", JSON.stringify(Winx.os.EOL))
