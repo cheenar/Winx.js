@@ -7,6 +7,10 @@
 
 #include <iostream>
 
+#define WINX_EXTERN __attribute__((visibility("default")))
+#define WINX_EXTERN_HIDDEN __attribute__((visibility("hidden")))
+#define WINX_EXTERN_PROTECTED __attribute__((visibility("protected")))
+
 #define CHECK(expr)                                                                                                    \
     if (!(expr))                                                                                                       \
     {                                                                                                                  \

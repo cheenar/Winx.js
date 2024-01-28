@@ -46,7 +46,7 @@ v8::Local<v8::ObjectTemplate> EngineBind(v8::Isolate *isolate);
 
 } // namespace Winx::Bindings::Console
 
-static void formatted_print(const v8::FunctionCallbackInfo<v8::Value> &args, std::string prefix)
+WINX_EXTERN_HIDDEN static void formatted_print(const v8::FunctionCallbackInfo<v8::Value> &args, std::string prefix)
 {
     CHECK_EQ(args.Length(), 2);
     v8::Isolate *isolate = args.GetIsolate();
@@ -57,6 +57,8 @@ static void formatted_print(const v8::FunctionCallbackInfo<v8::Value> &args, std
     v8::String::Utf8Value newline(isolate, args[1]);
     std::cout << *newline;
 }
+
+// TODO: Supoport variadic arguments console.log
 
 void Winx::Bindings::Console::log(const v8::FunctionCallbackInfo<v8::Value> &args)
 {

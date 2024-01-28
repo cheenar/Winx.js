@@ -1,8 +1,9 @@
-#ifndef __WINX_CONFIG_HPP__
-#define __WINX_CONFIG_HPP__
+#ifndef __SRC_WINX_CONFIG_HPP__
+#define __SRC_WINX_CONFIG_HPP__
 
 #include <toml.h>
 
+#include "util.hpp"
 #include "winx_globals.hpp"
 #include "winx_util.hpp"
 #include <iostream>
@@ -35,4 +36,4 @@ string get_winx_flag(string flag_name, string default_value = "", string config_
 
 } // namespace Winx::Config
 
-#endif // __WINX_CONFIG_HPP__
+#endif // __SRC_WINX_CONFIG_HPP__

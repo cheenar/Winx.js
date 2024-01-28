@@ -9,6 +9,7 @@
 #include <v8.h>
 
 #include "embedded_winx_polyfill.h"
+#include "util.hpp"
 #include "winx_config.hpp"
 #include "winx_console.hpp"
 #include "winx_fs.hpp"
@@ -25,10 +26,6 @@
  */
 #define POLYFILL_FILE_CONTENTS polyfills_Winx_js
 #define POLYFILL_FILE_LENGTH polyfills_Winx_js_len
-
-#define WINX_EXTERN __attribute__((visibility("default")))
-#define WINX_EXTERN_HIDDEN __attribute__((visibility("hidden")))
-#define WINX_EXTERN_PROTECTED __attribute__((visibility("protected")))
 
 extern unsigned int polyfills_Winx_js_len;
 extern unsigned char polyfills_Winx_js[];
