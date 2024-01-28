@@ -30,6 +30,26 @@
 extern unsigned int polyfills_Winx_js_len;
 extern unsigned char polyfills_Winx_js[];
 
+#define CONTEXT_GLOBAL_STORE(isolate, context, var, name)                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        auto state = External::New(isolate, var);                                                                      \
+        context->Global()                                                                                              \
+            ->Set(context, String::NewFromUtf8(isolate, name, NewStringType::kNormal).ToLocalChecked(), state)         \
+            .FromJust();                                                                                               \
+    } while (0)
+
+#define CONTEXT_GLOBAL_STORE_INFERENCE(isolate, context, var) CONTEXT_GLOBAL_STORE(isolate, context, var, #var)
+
+#define CONTEXT_GLOBAL_STORE_RETRIEVE(isolate, type, name)                                                             \
+    static_cast<type>(isolate->GetCurrentContext()                                                                     \
+                          ->Global()                                                                                   \
+                          ->Get(isolate->GetCurrentContext(),                                                          \
+                                String::NewFromUtf8(isolate, name, NewStringType::kNormal).ToLocalChecked())           \
+                          .ToLocalChecked()                                                                            \
+                          .As<External>()                                                                              \
+                          ->Value())
+
 using std::string;
 using std::unique_ptr;
 using v8::Boolean;

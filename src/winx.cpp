@@ -4,11 +4,7 @@ void Winx::NaiveEngine::InternalExecuteJavascript()
 {
     Context::Scope context_scope(this->GetContext());
     {
-        auto externalWinxEngine = External::New(isolate, this);
-        this->GetContext()
-            ->Global()
-            ->Set(this->GetContext(), String::NewFromUtf8Literal(isolate, "winxEngine"), externalWinxEngine)
-            .FromJust();
+        CONTEXT_GLOBAL_STORE(isolate, this->GetContext(), this, "winxEngine");
 
         Local<String> initial_runtime;
         // TODO: Still really hacky :D
@@ -120,13 +116,7 @@ string Winx::GetEmbeddedPolyfillData()
 
 void Winx::EmbeddedRequestGetterAccessor(Local<String> property, const PropertyCallbackInfo<Value> &info)
 {
-    Local<External> externalWinxEngine =
-        info.This()
-            ->Get(info.GetIsolate()->GetCurrentContext(),
-                  String::NewFromUtf8(info.GetIsolate(), "winxEngine", NewStringType::kNormal).ToLocalChecked())
-            .ToLocalChecked()
-            .As<External>();
-    NaiveEngine *winxEngine = static_cast<NaiveEngine *>(externalWinxEngine->Value());
+    NaiveEngine *winxEngine = CONTEXT_GLOBAL_STORE_RETRIEVE(info.GetIsolate(), NaiveEngine *, "winxEngine");
 
     Isolate *isolate = info.GetIsolate();
     Local<Context> context = isolate->GetCurrentContext();
@@ -205,7 +195,6 @@ int internal_main(int argc, char *argv[])
         Isolate *isolate = engine.GetIsolate();
         Isolate::Scope isolate_scope(isolate);
         HandleScope handle_scope(isolate);
-        engine.SetupBinding(engine.GetGlobalThis(), Winx::Bindings::Os::EngineBind(engine.GetIsolate()), "custom_bind");
         engine.InitializeContextWithGlobalObject();
         engine.ExecuteEmbeddedProgram();
     }

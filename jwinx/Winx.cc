@@ -5,22 +5,8 @@
 
 static void invoke_jni_helloJava(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
-    v8::Local<v8::Object> global = info.GetIsolate()->GetCurrentContext()->Global();
-    Local<External> externalEnv =
-        global
-            ->Get(info.GetIsolate()->GetCurrentContext(),
-                  String::NewFromUtf8(info.GetIsolate(), "JNI_ENV", NewStringType::kNormal).ToLocalChecked())
-            .ToLocalChecked()
-            .As<External>();
-    JNIEnv *env = static_cast<JNIEnv *>(externalEnv->Value());
-
-    Local<External> externalObj =
-        global
-            ->Get(info.GetIsolate()->GetCurrentContext(),
-                  String::NewFromUtf8(info.GetIsolate(), "JNI_OBJ", NewStringType::kNormal).ToLocalChecked())
-            .ToLocalChecked()
-            .As<External>();
-    jobject obj = static_cast<jobject>(externalObj->Value());
+    JNIEnv *env = CONTEXT_GLOBAL_STORE_RETRIEVE(info.GetIsolate(), JNIEnv *, "env");
+    jobject obj = CONTEXT_GLOBAL_STORE_RETRIEVE(info.GetIsolate(), jobject, "obj");
 
     jclass cls = env->GetObjectClass(obj);
     jmethodID methodId = env->GetMethodID(cls, "helloJava", "()V");
@@ -61,15 +47,8 @@ JNIEXPORT void JNICALL Java_Winx_startupV8(JNIEnv *env, jobject obj, jstring str
 
         engine.InitializeContextWithGlobalObject();
         Local<Context> context = Local<Context>::New(engine.GetIsolate(), engine.GetContext());
-        context->Global()
-            ->Set(context, String::NewFromUtf8(isolate, "JNI_ENV", NewStringType::kNormal).ToLocalChecked(),
-                  v8::External::New(isolate, env))
-            .FromJust();
-
-        context->Global()
-            ->Set(context, String::NewFromUtf8(isolate, "JNI_OBJ", NewStringType::kNormal).ToLocalChecked(),
-                  v8::External::New(isolate, obj))
-            .FromJust();
+        CONTEXT_GLOBAL_STORE_INFERENCE(isolate, context, env);
+        CONTEXT_GLOBAL_STORE_INFERENCE(isolate, context, obj);
     }
 
     {

@@ -16,4 +16,4 @@ concurrent-maglev-high-priority-threads = true
 
 [winx]
 modules_folder = "./examples/"
-polyfills_file = "./polyfills/Winx.js"
+#polyfills_file = "./polyfills/Winx.js"
