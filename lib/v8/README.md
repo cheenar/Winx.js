@@ -1,5 +1,6 @@
 1. Download [V8](https://v8.dev/docs/build)
 2. Build [V8](https://v8.dev/docs/build-gn)
+3. Copy the libv8_monolith
 
 ```
 # Build arguments go here.
