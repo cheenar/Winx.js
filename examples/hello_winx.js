@@ -1,1 +1,1 @@
-Winx.console.log("Hello Winx! 🦋") 
+console.log("Hello Winx! 🦋") 

@@ -4,7 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/include/v8",
+                "${workspaceFolder}/include/toml++"
             ],
             "defines": [],
             "macFrameworkPath": [
@@ -14,7 +16,7 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "macos-clang-arm64",
-            "C_Cpp.vcFormat.indent.namespaceContents": true,
+            "C_Cpp.vcFormat.indent.namespaceContents": true
         }
     ],
     "version": 4
