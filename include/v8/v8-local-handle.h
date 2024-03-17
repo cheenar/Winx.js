@@ -62,6 +62,7 @@ class ReturnValue;
 class String;
 template <class F>
 class Traced;
+class TypecheckWitness;
 class Utils;
 
 namespace debug {
@@ -135,6 +136,9 @@ class V8_EXPORT V8_NODISCARD HandleScope {
   internal::Isolate* i_isolate_;
   internal::Address* prev_next_;
   internal::Address* prev_limit_;
+#ifdef V8_ENABLE_CHECKS
+  int scope_level_ = 0;
+#endif
 
   // LocalBase<T>::New uses CreateHandle with an Isolate* parameter.
   template <typename T>
@@ -402,6 +406,8 @@ class V8_TRIVIAL_ABI Local : public LocalBase<T>,
   }
 
 #ifdef V8_ENABLE_DIRECT_LOCAL
+  friend class TypecheckWitness;
+
   V8_INLINE static Local<T> FromAddress(internal::Address ptr) {
     return Local<T>(LocalBase<T>(ptr));
   }
